@@ -26,25 +26,28 @@ if "TAC_AGENDA_GH_PROJECT_URL" in os.environ and os.environ["TAC_AGENDA_GH_PROJE
             print("Invalid response from gh client: '{}'".format(command.stderr))
             sys.exit(0)
         
-        for item in projectData['items']:
+        for item in projectData.get('items',[]):
             print("Processing {}...".format(item['content']['title']))
             meetingItem = {
-                'title': item['content']['title'],
-                'url': item['content']['url'],
-                'number': item['content']['number'],
-                'scheduled_date': item['scheduled Date'] if 'scheduled Date' in item else None,
-                'status': item['status'] if 'status' in item else None,
-                'last_review_date': item['last Review Date'] if 'last Review Date' in item else None,
+                'title': item.get('content',{}).get('title'),
+                'url': item.get('content',{}).get('url'),
+                'number': item.get('content',{}).get('number'),
+                'scheduled_date': item.get('scheduled Date'),
+                'status': item.get('status'),
+                'last_review_date': item.get('last Review Date'),
                 }
-            if 'labels' in item:
-                if '1-new-project-wg' in item['labels']:
-                    meetingItem['meeting_label'] = '1-new-project-wg'
-                elif '2-annual-review' in item['labels']:
-                    meetingItem['meeting_label'] = '2-annual-review'
-                elif '3-tac-meeting-long' in item['labels']:
-                    meetingItem['meeting_label'] = '3-tac-meeting-long'
-                elif '4-tac-meeting-short' in item['labels']:
-                    meetingItem['meeting_label'] = '4-tac-meeting-short'
+            if '1-new-project-wg' in item.get('labels',{}):
+                meetingItem['meeting_label'] = '1-new-project-wg'
+            elif '2-annual-review' in item.get('labels',{}):
+                meetingItem['meeting_label'] = '2-annual-review'
+            elif '2-annual-review-tac' in item.get('labels',{}):
+                meetingItem['meeting_label'] = '2-annual-review'
+            elif '2-annual-review-sig' in item.get('labels',{}):
+                meetingItem['meeting_label'] = '2-annual-review-sig'
+            elif '3-tac-meeting-long' in item.get('labels',{}):
+                meetingItem['meeting_label'] = '3-tac-meeting-long'
+            elif '4-tac-meeting-short' in item.get('labels',{}):
+                meetingItem['meeting_label'] = '4-tac-meeting-short'
             else:
                 meetingItem['meeting_label'] = None
             csvRows.append(meetingItem)
