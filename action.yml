@@ -49,6 +49,7 @@ runs:
       GITHUB_TOKEN: ${{ env.token }}
     run: |
       python ../lfx-tac-actions/updateprojects.py
+      python ../lfx-tac-actions/updateclomonitor.py
       python ../lfx-tac-actions/updatetacmembers.py
       python ../lfx-tac-actions/updatetacagendaitems.py
   - name: Get current date
@@ -66,5 +67,4 @@ runs:
       labels: automerge
       commit-message: Update Data Sources from LFX
       signoff: true
-
 
