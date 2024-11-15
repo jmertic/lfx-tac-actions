@@ -25,7 +25,7 @@ runs:
     with:
       token: ${{ env.token }}
       repository: ${{ env.repository }}
-      ref: ${{ env.ref }}
+      ref: movetopoetry #${{ env.ref }}
       path: tac-repo
   - name: Checkout lfx-tac-actions
     uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.1.7@v4
