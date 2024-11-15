@@ -42,7 +42,9 @@ runs:
   - name: Install dependencies
     shell: bash
     working-directory: ./lfx-tac-actions
-    run: poetry install
+    run: |
+      ls
+      poetry install
   - name: Run build
     working-directory: ./lfx-tac-actions
     shell: bash
