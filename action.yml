@@ -44,7 +44,7 @@ runs:
     working-directory: ./lfx-tac-actions
     run: poetry install
   - name: Run build
-    working-directory: ./tac-repo
+    working-directory: ./lfx-tac-actions
     shell: bash
     env:
       LANDSCAPE_URL: ${{ inputs.landscape_url }}
@@ -54,10 +54,12 @@ runs:
       GH_TOKEN: ${{ env.token }}
       GITHUB_TOKEN: ${{ env.token }}
     run: |
-      poetry run updateprojects
-      poetry run updatetacmembers
-      poetry run updatetacagendaitems
-      poetry run updateclomonitor
+      poetry shell
+      cd ../tac-repo
+      updateprojects
+      updatetacmembers
+      updatetacagendaitems
+      updateclomonitor
   - name: Get current date
     id: date
     uses: Kaven-Universe/github-action-current-date-time@f2c12d90cff9c3e7b1f50430886e632fe31fcee1 # v1.4.0
