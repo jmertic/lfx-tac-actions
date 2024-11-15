@@ -51,7 +51,7 @@ if os.environ.get("LANDSCAPE_URL") != '' and os.environ.get("ARTWORK_URL") != ''
         if 'repositories' in projectData:
             for repo in projectData.get('repositories'):
                 projectEntry['repositories'].append({
-                    'name': repo.get('url'].rsplit('/', 1)[-1),
+                    'name': repo.get('url').rsplit('/', 1)[-1],
                     'url': repo.get('url'),
                     'exclude': ['clomonitor']
                 })
