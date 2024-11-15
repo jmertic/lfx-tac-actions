@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "lfx-tac-actions"
+version = "20241115"
+description = "GitHub Action to sync data from LFX to a TAC repository"
+authors = ["John Mertic <jmertic@linuxfoundation.org>"]
+license = "Apache-2.0"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.13"
+pyyaml = "^6.0.2"
+
+[tool.poetry.scripts]
+updateprojects = "lfx_tac_actions.updateprojects:main"
+updateclomonitor = "lfx_tac_actions.updateclomonitor:main"
+updatetacmembers = "lfx_tac_actions.updatetacmembers:main"
+updatetacagendaitems = "lfx_tac_actions.updatetacagendaitems:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
