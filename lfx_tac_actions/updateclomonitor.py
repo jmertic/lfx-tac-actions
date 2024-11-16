@@ -61,6 +61,7 @@ def main():
                 projectEntries.append(projectEntry)
         
     with open(args.output, 'w') as cloMonitorFileObject:
+        print("Saving file {}".format(args.output))
         yaml.dump(projectEntries, cloMonitorFileObject, sort_keys=False, indent=2)
 
 if __name__ == '__main__':

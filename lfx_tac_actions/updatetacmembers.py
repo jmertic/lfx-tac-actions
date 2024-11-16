@@ -38,6 +38,7 @@ def main():
                         })
 
             with open(args.output, 'w') as tacmembersCsvFileObject:
+                print("Saving file {}".format(args.output))
                 writer = csv.DictWriter(tacmembersCsvFileObject, fieldnames = csvRows[0].keys())
                 writer.writeheader() 
                 writer.writerows(csvRows)

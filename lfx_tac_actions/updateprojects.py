@@ -55,6 +55,7 @@ def main():
                     })
 
         with open(args.output, 'w') as projectsCsvFileObject:
+            print("Saving file {}".format(args.output))
             writer = csv.DictWriter(projectsCsvFileObject, fieldnames = csvRows[0].keys())
             writer.writeheader() 
             writer.writerows(csvRows)

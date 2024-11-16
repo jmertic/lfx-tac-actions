@@ -21,7 +21,6 @@ def main():
     if os.environ.get("TAC_AGENDA_GH_PROJECT_URL") != '':
         urlparts = urlparse(os.environ.get("TAC_AGENDA_GH_PROJECT_URL")).path.split('/')
         if urlparts and urlparts[1] == 'orgs' and urlparts[3] == 'projects':
-            csvFile = '_data/meeting-agenda-items.csv'
             command = subprocess.run("gh project item-list {gh_project_id} --owner {gh_org} --format json --limit 100".format(gh_project_id=urlparts[4],gh_org=urlparts[2]), shell=True, capture_output=True)
             jsonProjectData = command.stdout
             
@@ -58,7 +57,8 @@ def main():
                     meetingItem['meeting_label'] = None
                 csvRows.append(meetingItem)
 
-            with open(csvFile, 'w') as csvFileObject:
+            with open(args.output, 'w') as csvFileObject:
+                print("Saving file {}".format(args.output))
                 writer = csv.DictWriter(csvFileObject, fieldnames = csvRows[0].keys())
                 writer.writeheader() 
                 writer.writerows(csvRows)
