@@ -35,8 +35,8 @@ def main():
                     urlparts = urllib.parse.urlparse(project.get('artwork_url'))
                     with urllib.request.urlopen('{}://{}/assets/data.json'.format(urlparts.scheme,urlparts.netloc)) as artworkResponse:
                         artworkData = json.load(artworkResponse)
-                        logo_url = '{}://{}{}{}'.format(urlparts.scheme,urlparts.netloc,urlparts.path, item.get(urlparts.path,{}).get('primary_logo'))
-                        logo_url_dark = '{}://{}{}{}'.format(urlparts.scheme,urlparts.netloc,urlparts.path, item.get(urlparts.path,{}).get('dark_logo'))
+                        logo_url = '{}://{}{}{}'.format(urlparts.scheme,urlparts.netloc,urlparts.path,artworkData.get(urlparts.path,{}).get('primary_logo'))
+                        logo_url_dark = '{}://{}{}{}'.format(urlparts.scheme,urlparts.netloc,urlparts.path,artworkData.get(urlparts.path,{}).get('dark_logo'))
                 else:
                     logo_url = project.get('logo')
                     logo_url_dark = project.get('logo')
