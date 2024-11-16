@@ -33,7 +33,6 @@ runs:
       token: ${{ env.token }}
       repository: jmertic/lfx-tac-actions
       path: lfx-tac-actions
-      ref: movetopoetry
   - name: Set up Python 3.x
     uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b # v5.3.0
     with:
