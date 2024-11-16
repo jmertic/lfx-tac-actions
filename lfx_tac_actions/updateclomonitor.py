@@ -6,14 +6,18 @@
 # encoding=utf8
 
 import yaml
+import argparse
 import urllib.request
 import urllib.parse
 import json
 import os
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-o", "--output", help="filename to save output to",default='_data/clomonitor.yaml')
+    args = parser.parse_args()
+    
     if os.environ.get("LANDSCAPE_URL") != '' and os.environ.get("ARTWORK_URL") != '':
-        cloMonitorFile = '_data/clomonitor.yaml'
         landscapeHostedProjects = '{}/api/projects/all.json'.format(os.environ.get("LANDSCAPE_URL"))
         projectEntries = []
 
@@ -56,7 +60,7 @@ def main():
                     })
                 projectEntries.append(projectEntry)
         
-    with open(cloMonitorFile, 'w') as cloMonitorFileObject:
+    with open(args.output, 'w') as cloMonitorFileObject:
         yaml.dump(projectEntries, cloMonitorFileObject, sort_keys=False, indent=2)
 
 if __name__ == '__main__':

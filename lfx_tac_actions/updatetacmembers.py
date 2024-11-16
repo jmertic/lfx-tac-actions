@@ -5,6 +5,7 @@
 #                                                                                                                       
 # encoding=utf8
 
+import argparse
 import csv
 import urllib.request
 import json
@@ -12,9 +13,12 @@ import os
 from urllib.parse import urlparse
 
 def main():
-    if "LFX_TAC_COMMITTEE_URL" in os.environ and os.environ["LFX_TAC_COMMITTEE_URL"] != '':
-        tacmembersCsvFile = '_data/tacmembers.csv'
-        urlparts = urlparse(os.environ["LFX_TAC_COMMITTEE_URL"]).path.split('/')
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-o", "--output", help="filename to save output to",default='_data/tacmembers.csv')
+    args = parser.parse_args()
+
+    if os.environ.get("LFX_TAC_COMMITTEE_URL") != '':
+        urlparts = urlparse(os.environ.get("LFX_TAC_COMMITTEE_URL")).path.split('/')
         if urlparts and urlparts[1] == 'project' and urlparts[3] == 'collaboration' and urlparts[4] == 'committees':
             committeeURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/{project_id}/committees/{committee_id}/members'.format(project_id=urlparts[2],committee_id=urlparts[5])
             csvRows = []
@@ -33,7 +37,7 @@ def main():
                         'HeadshotURL': committeeMember['LogoURL'] if 'LogoURL' in committeeMember else None
                         })
 
-            with open(tacmembersCsvFile, 'w') as tacmembersCsvFileObject:
+            with open(args.output, 'w') as tacmembersCsvFileObject:
                 writer = csv.DictWriter(tacmembersCsvFileObject, fieldnames = csvRows[0].keys())
                 writer.writeheader() 
                 writer.writerows(csvRows)

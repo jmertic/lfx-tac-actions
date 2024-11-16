@@ -9,15 +9,17 @@ import csv
 import urllib.request
 import json
 import os
+import argparse
 
 def main():
-    if "LANDSCAPE_URL" in os.environ and os.environ["LANDSCAPE_URL"] != '':
-        projectsCsvFile = '_data/projects.csv'
-        landscapeBaseURL = os.environ["LANDSCAPE_URL"] 
-        landscapeHostedProjects = '{}/api/projects/all.json'.format(landscapeBaseURL)
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-o", "--output", help="filename to save output to",default='_data/projects.csv')
+    args = parser.parse_args()
+    
+    if os.environ.get("LANDSCAPE_URL") != '':
+        landscapeHostedProjects = '{}/api/projects/all.json'.format(os.environ["LANDSCAPE_URL"])
 
         csvRows = []
-
         with urllib.request.urlopen(landscapeHostedProjects) as hostedProjectsResponse:
             projectData = json.load(hostedProjectsResponse)
             for project in projectData:
@@ -52,7 +54,7 @@ def main():
                     'Contributed By': project.get('annotations',{}).get('contributed_by'),
                     })
 
-        with open(projectsCsvFile, 'w') as projectsCsvFileObject:
+        with open(args.output, 'w') as projectsCsvFileObject:
             writer = csv.DictWriter(projectsCsvFileObject, fieldnames = csvRows[0].keys())
             writer.writeheader() 
             writer.writerows(csvRows)
