@@ -1,5 +1,8 @@
 # GitHub Action to sync data from LFX to a TAC repository
 
+[![License](https://img.shields.io/github/license/jmertic/lfx-landscape-tools)](LICENSE)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jmertic_lfx-tac-actions&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jmertic_lfx-tac-actions)
+
 ## Installation
 
 Add the following to a file `.github/workflows/updatedatafromlfx.yml`
