@@ -20,28 +20,28 @@ def main():
     if os.environ.get("LFX_TAC_COMMITTEE_URL") != '':
         urlparts = urlparse(os.environ.get("LFX_TAC_COMMITTEE_URL")).path.split('/')
         if urlparts and urlparts[1] == 'project' and urlparts[3] == 'collaboration' and urlparts[4] == 'committees':
-            committeeURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/{project_id}/committees/{committee_id}/members'.format(project_id=urlparts[2],committee_id=urlparts[5])
-            csvRows = []
+            committee_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/{project_id}/committees/{committee_id}/members'.format(project_id=urlparts[2],committee_id=urlparts[5])
+            csv_rows = []
 
-            with urllib.request.urlopen(committeeURL) as committeeURLResponse:
-                committeeURLResponseJSON = json.load(committeeURLResponse)
-                for committeeMember in committeeURLResponseJSON['Data']:
-                    print("Processing {} {}...".format(committeeMember['FirstName'].title(),committeeMember['LastName'].title()))
-                    csvRows.append({
-                        'Full Name': "{} {}".format(committeeMember['FirstName'].title(),committeeMember['LastName'].title()),
-                        'Account Name: Account Name': committeeMember['Organization']['Name'] if 'Organization' in committeeMember and 'Name' in committeeMember['Organization'] else None,
-                        'Appointed By': committeeMember['AppointedBy'] if 'AppointedBy' in committeeMember else None,
-                        'Voting Status': committeeMember['VotingStatus'] if 'VotingStatus' in committeeMember else None,
-                        'Special Role': committeeMember['Role'] if 'Role' in committeeMember else None,
-                        'Title': committeeMember['Title'] if 'Title' in committeeMember else None,
-                        'HeadshotURL': committeeMember['LogoURL'] if 'LogoURL' in committeeMember else None
+            with urllib.request.urlopen(committee_url) as committee_url_response:
+                committee_url_response_json = json.load(committee_url_response)
+                for committee_member in committee_url_response_json.get('Data',[]):
+                    print("Processing {} {}...".format(committee_member.get('FirstName').title(),committee_member.get('LastName').title()))
+                    csv_rows.append({
+                        'Full Name': "{} {}".format(committee_member.get('FirstName').title(),committee_member.get('LastName').title()),
+                        'Account Name: Account Name': committee_member.get('Organization',{}).get('Name'),
+                        'Appointed By': committee_member.get('AppointedBy'),
+                        'Voting Status': committee_member.get('VotingStatus'),
+                        'Special Role': committee_member.get('Role'),
+                        'Title': committee_member.get('Title'),
+                        'HeadshotURL': committee_member.get('LogoURL')
                         })
 
-            with open(args.output, 'w') as tacmembersCsvFileObject:
+            with open(args.output, 'w') as csv_file_object:
                 print("Saving file {}".format(args.output))
-                writer = csv.DictWriter(tacmembersCsvFileObject, fieldnames = csvRows[0].keys())
+                writer = csv.DictWriter(csv_file_object, fieldnames = csv_rows[0].keys())
                 writer.writeheader() 
-                writer.writerows(csvRows)
+                writer.writerows(csv_rows)
 
 if __name__ == '__main__':
     main()
