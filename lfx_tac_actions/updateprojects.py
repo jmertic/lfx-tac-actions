@@ -17,18 +17,18 @@ def main():
     args = parser.parse_args()
     
     if os.environ.get("LANDSCAPE_URL") != '':
-        landscapeHostedProjects = '{}/api/projects/all.json'.format(os.environ["LANDSCAPE_URL"])
+        landscape_hosted_projects = '{}/api/projects/all.json'.format(os.environ["LANDSCAPE_URL"])
 
-        csvRows = []
-        with urllib.request.urlopen(landscapeHostedProjects) as hostedProjectsResponse:
-            projectData = json.load(hostedProjectsResponse)
-            for project in projectData:
+        csv_rows = []
+        with urllib.request.urlopen(landscape_hosted_projects) as hosted_projects_response:
+            project_data = json.load(hosted_projects_response)
+            for project in project_data:
                 categories = []
                 categories.append("{category} / {subcategory}".format(category=project.get('category'),subcategory=project.get('subcategory')))
                 for additional_category in project.get('additional_categories',{}):
                     categories.append("{category} / {subcategory}".format(category=additional_category['category'],subcategory=additional_category['subcategory']))
                 print("Processing {}...".format(project.get('name')))
-                csvRows.append({
+                csv_rows.append({
                     'Name': project.get('name'),
                     'Level': project.get('maturity'),
                     'Logo URL': project.get('logo_url'),
@@ -54,11 +54,11 @@ def main():
                     'Contributed By': project.get('annotations',{}).get('contributed_by'),
                     })
 
-        with open(args.output, 'w') as projectsCsvFileObject:
+        with open(args.output, 'w') as csv_file_object:
             print("Saving file {}".format(args.output))
-            writer = csv.DictWriter(projectsCsvFileObject, fieldnames = csvRows[0].keys())
+            writer = csv.DictWriter(csv_file_object, fieldnames = csv_rows[0].keys())
             writer.writeheader() 
-            writer.writerows(csvRows)
+            writer.writerows(csv_rows)
 
 if __name__ == '__main__':
     main()
