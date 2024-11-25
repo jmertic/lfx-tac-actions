@@ -10,7 +10,7 @@ import tempfile
 import os
 import responses
 
-from lfx_tac_actions.updatetacagendaitems import *
+from lfx_tac_actions.updatetacagendaitems import main
 
 class TestUpdateTACAgendaItems(unittest.TestCase):
     

@@ -10,7 +10,7 @@ import tempfile
 import os
 import responses
 
-from lfx_tac_actions.updateclomonitor import *
+from lfx_tac_actions.updateclomonitor import main
 
 class TestUpdateCLOMonitor(unittest.TestCase):
     

@@ -10,7 +10,7 @@ import tempfile
 import os
 import responses
 
-from lfx_tac_actions.updateprojects import *
+from lfx_tac_actions.updateprojects import main
 
 class TestUpdateProjects(unittest.TestCase):
     

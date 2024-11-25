@@ -10,7 +10,7 @@ import tempfile
 import os
 import responses
 
-from lfx_tac_actions.updatetacmembers import *
+from lfx_tac_actions.updatetacmembers import main
 
 class TestUpdateTACMembers(unittest.TestCase):
     
