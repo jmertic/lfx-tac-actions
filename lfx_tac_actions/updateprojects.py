@@ -6,7 +6,7 @@
 # encoding=utf8
 
 import csv
-import urllib.request
+import requests
 import json
 import os
 import argparse
@@ -20,8 +20,8 @@ def main():
         landscape_hosted_projects = '{}/api/projects/all.json'.format(os.environ["LANDSCAPE_URL"])
 
         csv_rows = []
-        with urllib.request.urlopen(landscape_hosted_projects) as hosted_projects_response:
-            project_data = json.load(hosted_projects_response)
+        with requests.get(landscape_hosted_projects) as hosted_projects_response:
+            project_data = hosted_projects_response.json()
             for project in project_data:
                 categories = []
                 categories.append("{category} / {subcategory}".format(category=project.get('category'),subcategory=project.get('subcategory')))

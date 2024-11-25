@@ -7,7 +7,7 @@
 
 import argparse
 import csv
-import urllib.request
+import requests
 import json
 import os
 from urllib.parse import urlparse
@@ -23,8 +23,8 @@ def main():
             committee_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/{project_id}/committees/{committee_id}/members'.format(project_id=urlparts[2],committee_id=urlparts[5])
             csv_rows = []
 
-            with urllib.request.urlopen(committee_url) as committee_url_response:
-                committee_url_response_json = json.load(committee_url_response)
+            with requests.get(committee_url) as committee_url_response:
+                committee_url_response_json = committee_url_response.json()
                 for committee_member in committee_url_response_json.get('Data',[]):
                     print("Processing {} {}...".format(committee_member.get('FirstName').title(),committee_member.get('LastName').title()))
                     csv_rows.append({
