@@ -16,13 +16,29 @@ from lfx_tac_actions.updatetacmembers import main
 class TestUpdateTACMembers(unittest.TestCase):
     
     @unittest.mock.patch.dict(os.environ, {"LFX_TAC_COMMITTEE_URL": ""}, clear=True)
-    def testMainNoLandscapeUrl(self):
+    def testMainNoLFXTACCommitteeURL(self):
         with tempfile.TemporaryDirectory() as tempdir:
             tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
             with unittest.mock.patch('argparse.ArgumentParser.parse_args') as mock:
                 mock.return_value = argparse.Namespace(output=tmpfilepath)
                 main()
                 self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
+
+    def testMainBrokenTACCommitteeURLs(self):
+        brokenurls = [
+            "https://projectadmin.lfx.linuxfoundation.org/dog/a0941000002wBymAAE/collaboration/committees/163b26f7-a49b-40a3-89bb-e0592296c003",
+            "https://projectadmin.lfx.linuxfoundation.org/project/a0941000002wBymAAE/collab/committees/163b26f7-a49b-40a3-89bb-e0592296c003",
+            "https://projectadmin.lfx.linuxfoundation.org/project/a0941000002wBymAAE/collaboration/committee/163b26f7-a49b-40a3-89bb-e0592296c003",
+            ]
+        for brokenurl in brokenurls:
+            with unittest.mock.patch.dict(os.environ, {"LFX_TAC_COMMITTEE_URL": brokenurl}, clear=True):
+                with tempfile.TemporaryDirectory() as tempdir:
+                    tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
+
+                    with unittest.mock.patch('argparse.ArgumentParser.parse_args') as mock:
+                        mock.return_value = argparse.Namespace(output=tmpfilepath)
+                        main()
+                    self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
 
     @responses.activate
     @unittest.mock.patch.dict(os.environ, {"LFX_TAC_COMMITTEE_URL": "https://projectadmin.lfx.linuxfoundation.org/project/a0941000002wBymAAE/collaboration/committees/163b26f7-a49b-40a3-89bb-e0592296c003"}, clear=True)

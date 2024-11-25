@@ -27,9 +27,9 @@ def main():
             csv_rows = []
             try:
                 project_data = json.loads(json_project_data)
-            except:
+            except ValueError:
                 print("Invalid response from gh client: '{}'".format(command.stderr))
-                sys.exit(0)
+                return
             
             for item in project_data.get('items',[]):
                 print("Processing {}...".format(item['content']['title']))
