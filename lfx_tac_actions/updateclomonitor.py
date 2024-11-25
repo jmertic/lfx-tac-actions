@@ -7,7 +7,7 @@
 
 import yaml
 import argparse
-import urllib.request
+import requests
 import urllib.parse
 import json
 import os
@@ -17,12 +17,12 @@ def main():
     parser.add_argument("-o", "--output", help="filename to save output to",default='_data/clomonitor.yaml')
     args = parser.parse_args()
     
-    if os.environ.get("LANDSCAPE_URL") != '' and os.environ.get("ARTWORK_URL") != '':
+    if os.environ.get("LANDSCAPE_URL") != '':
         landscape_hosted_projects = '{}/api/projects/all.json'.format(os.environ.get("LANDSCAPE_URL"))
         project_entries = []
 
-        with urllib.request.urlopen(landscape_hosted_projects) as hosted_projects_response:
-            project_data = json.load(hosted_projects_response)
+        with requests.get(landscape_hosted_projects) as hosted_projects_response:
+            project_data = hosted_projects_response.json()
             for project in project_data:
                 if project.get('maturity') == 'emeritus':
                     continue
@@ -33,8 +33,8 @@ def main():
                 logo_url_dark = ''
                 if project.get('artwork_url'):
                     urlparts = urllib.parse.urlparse(project.get('artwork_url'))
-                    with urllib.request.urlopen('{}://{}/assets/data.json'.format(urlparts.scheme,urlparts.netloc)) as artwork_response:
-                        artwork_data = json.load(artwork_response)
+                    with requests.get('{}://{}/assets/data.json'.format(urlparts.scheme,urlparts.netloc)) as artwork_response:
+                        artwork_data = artwork_response.json()
                         logo_url = '{}://{}{}{}'.format(urlparts.scheme,urlparts.netloc,urlparts.path,artwork_data.get(urlparts.path,{}).get('primary_logo'))
                         logo_url_dark = '{}://{}{}{}'.format(urlparts.scheme,urlparts.netloc,urlparts.path,artwork_data.get(urlparts.path,{}).get('dark_logo'))
                 else:
@@ -60,9 +60,9 @@ def main():
                     })
                 project_entries.append(project_entry)
         
-    with open(args.output, 'w') as clomonitor_file_object:
-        print("Saving file {}".format(args.output))
-        yaml.dump(project_entries, clomonitor_file_object, sort_keys=False, indent=2)
+        with open(args.output, 'w') as clomonitor_file_object:
+            print("Saving file {}".format(args.output))
+            yaml.dump(project_entries, clomonitor_file_object, sort_keys=False, indent=2)
 
 if __name__ == '__main__':
     main()
