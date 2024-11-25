@@ -9,6 +9,7 @@ import unittest
 import tempfile
 import os
 import responses
+import argparse
 
 from lfx_tac_actions.updatetacmembers import main
 
