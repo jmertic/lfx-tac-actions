@@ -29,7 +29,7 @@ def main():
                 project_data = json.loads(json_project_data)
             except:
                 print("Invalid response from gh client: '{}'".format(command.stderr))
-                sys.exit(0)
+                return
             
             for item in project_data.get('items',[]):
                 print("Processing {}...".format(item['content']['title']))
