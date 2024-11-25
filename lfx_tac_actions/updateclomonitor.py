@@ -38,8 +38,8 @@ def main():
                         logo_url = '{}://{}{}{}'.format(urlparts.scheme,urlparts.netloc,urlparts.path,artwork_data.get(urlparts.path,{}).get('primary_logo'))
                         logo_url_dark = '{}://{}{}{}'.format(urlparts.scheme,urlparts.netloc,urlparts.path,artwork_data.get(urlparts.path,{}).get('dark_logo'))
                 else:
-                    logo_url = project.get('logo')
-                    logo_url_dark = project.get('logo')
+                    logo_url = project.get('logo_url')
+                    logo_url_dark = project.get('logo_url')
 
                 project_entry = {
                     'name': project.get('annotations',{}).get('slug'),
