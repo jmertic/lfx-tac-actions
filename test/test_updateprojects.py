@@ -50,7 +50,8 @@ class TestUpdateProjects(unittest.TestCase):
                       "chair": "Scott Wilson",
                       "ical_url": "https://webcal.prod.itx.linuxfoundation.org/lfx/lfv8NMKI8tcp96N5tb",
                       "next_annual_review_date": "2025-03-19",
-                      "calendar_url": "https://zoom-lfx.platform.linuxfoundation.org/meetings/aswf-language-interop-project"
+                      "calendar_url": "https://zoom-lfx.platform.linuxfoundation.org/meetings/aswf-language-interop-project",
+                      "project_org": "https://github.com/vfx-rs"
                     },
                     "artwork_url": "https://artwork.aswf.io/projects/aswf-language-interop-project/",
                     "chat_channel": "#rust",
@@ -82,7 +83,7 @@ class TestUpdateProjects(unittest.TestCase):
 
                 with open(tmpfilepath, 'r') as tmpfile:
                     self.maxDiff = None
-                    self.assertEqual(tmpfile.read(),'Name,Level,Logo URL,Slug,Categories,Website,Chair,TAC Representative,Documentation,Calendar,Artwork,iCal,LFX Insights URL,Accepted Date,Last Review Date,Next Review Date,Slack URL,Chat Channel,Mailing List,Github Org,Best Practices Badge ID,Primary Github Repo,Contributed By\nASWF Language Interop Project,working-group,https://aswf.landscape2.io/logos/803e21319d55195829c27a3bc448d43e8f14dbcf544e4d44418299df3a3cca61.svg,aswf-language-interop-project,"ASWF Projects / All,Math and Simulation / Math Foundations",https://github.com/vfx-rs,Scott Wilson,,,https://zoom-lfx.platform.linuxfoundation.org/meetings/aswf-language-interop-project,https://artwork.aswf.io/projects/aswf-language-interop-project/,https://webcal.prod.itx.linuxfoundation.org/lfx/lfv8NMKI8tcp96N5tb,,2023-10-20,,2025-03-19,https://slack.aswf.io,#rust,https://lists.aswf.io/g/wg-rust,,,,\n')
+                    self.assertEqual(tmpfile.read(),'Name,Level,Logo URL,Slug,Categories,Website,Chair,TAC Representative,Documentation,Calendar,Artwork,iCal,LFX Insights URL,Accepted Date,Last Review Date,Next Review Date,Slack URL,Chat Channel,Mailing List,Github Org,Best Practices Badge ID,Primary Github Repo,Contributed By\nASWF Language Interop Project,working-group,https://aswf.landscape2.io/logos/803e21319d55195829c27a3bc448d43e8f14dbcf544e4d44418299df3a3cca61.svg,aswf-language-interop-project,"ASWF Projects / All,Math and Simulation / Math Foundations",https://github.com/vfx-rs,Scott Wilson,,,https://zoom-lfx.platform.linuxfoundation.org/meetings/aswf-language-interop-project,https://artwork.aswf.io/projects/aswf-language-interop-project/,https://webcal.prod.itx.linuxfoundation.org/lfx/lfv8NMKI8tcp96N5tb,https://insights.lfx.linuxfoundation.org/foundation/aswf/overview?project=aswf-language-interop-project,2023-10-20,2024-03-20,2025-03-19,https://slack.aswf.io,#rust,https://lists.aswf.io/g/wg-rust,https://github.com/vfx-rs,,https://github.com/vfx-rs/organization,\n')
 
 if __name__ == '__main__':
     unittest.main()

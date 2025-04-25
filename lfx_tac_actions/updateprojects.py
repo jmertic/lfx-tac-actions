@@ -25,8 +25,13 @@ def main():
             for project in project_data:
                 categories = []
                 categories.append("{category} / {subcategory}".format(category=project.get('category'),subcategory=project.get('subcategory')))
-                for additional_category in project.get('additional_categories',{}):
+                for additional_category in project.get('additional_categories',[]):
                     categories.append("{category} / {subcategory}".format(category=additional_category['category'],subcategory=additional_category['subcategory']))
+                repo_url = ''
+                for repository in project.get('repositories',[]):
+                    if repository.get('primary'):
+                        repo_url = repository.get('url')
+
                 print("Processing {}...".format(project.get('name')))
                 csv_rows.append({
                     'Name': project.get('name'),
@@ -41,16 +46,16 @@ def main():
                     'Calendar': project.get('annotations',{}).get('calendar_url'),
                     'Artwork': project.get('artwork_url'),
                     'iCal': project.get('annotations',{}).get('ical_url'),
-                    'LFX Insights URL': project.get('dev_stats_url'),
+                    'LFX Insights URL': project.get('devstats_url'),
                     'Accepted Date': project.get('accepted_at'),
-                    'Last Review Date': project.get('extra',{}).get('annual_review_date'),
+                    'Last Review Date': project.get('latest_annual_review_at'),
                     'Next Review Date': project.get('annotations',{}).get('next_annual_review_date'),
                     'Slack URL': project.get('slack_url'),
                     'Chat Channel': project.get('chat_channel'),
                     'Mailing List': project.get('mailing_list_url'),
                     'Github Org': project.get('annotations',{}).get('project_org'),
                     'Best Practices Badge ID': project.get('bestPracticeBadgeId') ,
-                    'Primary Github Repo': project.get('repo_url'),
+                    'Primary Github Repo': repo_url,
                     'Contributed By': project.get('annotations',{}).get('contributed_by'),
                     })
 
