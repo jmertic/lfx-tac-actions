@@ -15,17 +15,13 @@ from lfx_tac_actions.updateclomonitor import main
 
 class TestUpdateCLOMonitor(unittest.TestCase):
     
-    @unittest.mock.patch.dict(os.environ, {"LANDSCAPE_URL": ""}, clear=True)
     def testMainNoLandscapeUrl(self):
         with tempfile.TemporaryDirectory() as tempdir:
             tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.yaml')
-            with unittest.mock.patch('argparse.ArgumentParser.parse_args') as mock:
-                mock.return_value = argparse.Namespace(output=tmpfilepath)
-                main()
-                self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
+            main(["-o",tmpfilepath,"--landscape_url",""])
+            self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
 
     @responses.activate
-    @unittest.mock.patch.dict(os.environ, {"LANDSCAPE_URL": "https://landscape.aswf.io"}, clear=True)
     def testMainEmeritusProject(self):
         responses.add(
             method=responses.GET,
@@ -97,13 +93,11 @@ class TestUpdateCLOMonitor(unittest.TestCase):
             )
         with tempfile.TemporaryDirectory() as tempdir:
             tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.yaml')
-            with unittest.mock.patch('argparse.ArgumentParser.parse_args') as mock:
-                mock.return_value = argparse.Namespace(output=tmpfilepath)
-                main()
+            main(["-o",tmpfilepath,"--landscape_url","https://landscape.aswf.io"])
 
-                with open(tmpfilepath, 'r') as tmpfile:
-                    self.maxDiff = None
-                    self.assertEqual(tmpfile.read(),'''[]\n''')
+            with open(tmpfilepath, 'r') as tmpfile:
+                self.maxDiff = None
+                self.assertEqual(tmpfile.read(),'''[]\n''')
     
     @responses.activate
     @unittest.mock.patch.dict(os.environ, {"LANDSCAPE_URL": "https://landscape.aswf.io"}, clear=True)
@@ -178,13 +172,11 @@ class TestUpdateCLOMonitor(unittest.TestCase):
             )
         with tempfile.TemporaryDirectory() as tempdir:
             tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.yaml')
-            with unittest.mock.patch('argparse.ArgumentParser.parse_args') as mock:
-                mock.return_value = argparse.Namespace(output=tmpfilepath)
-                main()
+            main(["-o",tmpfilepath,"--landscape_url","https://landscape.aswf.io"])
 
-                with open(tmpfilepath, 'r') as tmpfile:
-                    self.maxDiff = None
-                    self.assertEqual(tmpfile.read(),'''- name: opencolorio
+            with open(tmpfilepath, 'r') as tmpfile:
+                self.maxDiff = None
+                self.assertEqual(tmpfile.read(),'''- name: opencolorio
   display_name: OpenColorIO
   description: The OpenColorIO project is committed to providing an industry standard
     solution for highly precise, performant, and consistent color management across
@@ -206,7 +198,6 @@ class TestUpdateCLOMonitor(unittest.TestCase):
 ''')
 
     @responses.activate
-    @unittest.mock.patch.dict(os.environ, {"LANDSCAPE_URL": "https://landscape.aswf.io"}, clear=True)
     def testMain(self):
         responses.add(
             method=responses.GET,
@@ -290,13 +281,11 @@ class TestUpdateCLOMonitor(unittest.TestCase):
             )
         with tempfile.TemporaryDirectory() as tempdir:
             tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.yaml')
-            with unittest.mock.patch('argparse.ArgumentParser.parse_args') as mock:
-                mock.return_value = argparse.Namespace(output=tmpfilepath)
-                main()
+            main(["-o",tmpfilepath,"--landscape_url","https://landscape.aswf.io"])
 
-                with open(tmpfilepath, 'r') as tmpfile:
-                    self.maxDiff = None
-                    self.assertEqual(tmpfile.read(),'''- name: opencolorio
+            with open(tmpfilepath, 'r') as tmpfile:
+                self.maxDiff = None
+                self.assertEqual(tmpfile.read(),'''- name: opencolorio
   display_name: OpenColorIO
   description: The OpenColorIO project is committed to providing an industry standard
     solution for highly precise, performant, and consistent color management across

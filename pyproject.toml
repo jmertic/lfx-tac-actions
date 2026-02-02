@@ -20,6 +20,8 @@ updateprojects = "lfx_tac_actions.updateprojects:main"
 updateclomonitor = "lfx_tac_actions.updateclomonitor:main"
 updatetacmembers = "lfx_tac_actions.updatetacmembers:main"
 updatetacagendaitems = "lfx_tac_actions.updatetacagendaitems:main"
+updatedecks = "lfx_tac_actions.updatedecks:main"
+updatecharters = "lfx_tac_actions.updatecharters:main"
 
 [build-system]
 requires = ["poetry-core"]

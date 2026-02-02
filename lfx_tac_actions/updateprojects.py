@@ -10,17 +10,20 @@ import requests
 import json
 import os
 import argparse
+import urllib.parse
 
-def main():
+def main(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", "--output", help="filename to save output to",default='_data/projects.csv')
-    args = parser.parse_args()
+    parser.add_argument("--landscape_url", help="URL to the project's landscape",required=True)
+    args = parser.parse_args(args)
     
-    if os.environ.get("LANDSCAPE_URL") != '':
-        landscape_hosted_projects = '{}/api/projects/all.json'.format(os.environ["LANDSCAPE_URL"])
+    landscape_hosted_projects = urllib.parse.urljoin(args.landscape_url,'api/projects/all.json')
 
-        csv_rows = []
+    csv_rows = []
+    try:
         with requests.get(landscape_hosted_projects) as hosted_projects_response:
+            hosted_projects_response.raise_for_status()
             project_data = hosted_projects_response.json()
             for project in project_data:
                 categories = []
@@ -64,6 +67,8 @@ def main():
             writer = csv.DictWriter(csv_file_object, fieldnames = csv_rows[0].keys())
             writer.writeheader() 
             writer.writerows(csv_rows)
+    except:
+        print(f"Error getting landscape_url {landscape_hosted_projects}")
 
 if __name__ == '__main__':
     main()
