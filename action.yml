@@ -111,7 +111,7 @@ runs:
     shell: bash
     if: inputs.updatedecks == 'true' && inputs.overview_decks != ''
     run: |
-      poetry run updatedecks -o ../repo/overview_deck --overview_decks "${{ inputs.overview_decks }}"
+      poetry run updatedecks -o ../repo/overview_deck --overview_decks '${{ inputs.overview_decks }}'
   - name: Get current date
     id: date
     uses: Kaven-Universe/github-action-current-date-time@f2c12d90cff9c3e7b1f50430886e632fe31fcee1 # v1.4.0
