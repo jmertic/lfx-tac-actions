@@ -15,14 +15,11 @@ from lfx_tac_actions.updatetacagendaitems import main
 
 class TestUpdateTACAgendaItems(unittest.TestCase):
     
-    @unittest.mock.patch.dict(os.environ, {"TAC_AGENDA_GH_PROJECT_URL": ""}, clear=True)
     def testMainNoTACAgendaUrl(self):
         with tempfile.TemporaryDirectory() as tempdir:
             tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
-            with unittest.mock.patch('argparse.ArgumentParser.parse_args') as mock:
-                mock.return_value = argparse.Namespace(output=tmpfilepath)
-                main()
-                self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
+            main(["-o",tmpfilepath,"--tac_agenda_gh_project_url",""])
+            self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
 
     def testMainBrokenTACAgendaUrls(self):
         brokenurls = [
@@ -30,15 +27,11 @@ class TestUpdateTACAgendaItems(unittest.TestCase):
             "https://github.com/orgs/openmainframeproject/settings",
             ]
         for brokenurl in brokenurls:
-            with unittest.mock.patch.dict(os.environ, {"TAC_AGENDA_GH_PROJECT_URL": brokenurl}, clear=True):
-                with tempfile.TemporaryDirectory() as tempdir:
-                    tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
-                    with unittest.mock.patch('argparse.ArgumentParser.parse_args') as mock:
-                        mock.return_value = argparse.Namespace(output=tmpfilepath)
-                        main()
-                        self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
+            with tempfile.TemporaryDirectory() as tempdir:
+                tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
+                main(["-o",tmpfilepath,"--tac_agenda_gh_project_url",brokenurl])
+                self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
     
-    @unittest.mock.patch.dict(os.environ, {"TAC_AGENDA_GH_PROJECT_URL": "https://github.com/orgs/openmainframeproject/projects/21"}, clear=True)
     @unittest.mock.patch('subprocess.run')
     def testMainInvalidJSONResponse(self, mock_run):
         mock_result = unittest.mock.Mock()
@@ -48,10 +41,8 @@ class TestUpdateTACAgendaItems(unittest.TestCase):
 
         with tempfile.TemporaryDirectory() as tempdir:
             tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
-            with unittest.mock.patch('argparse.ArgumentParser.parse_args') as mock:
-                mock.return_value = argparse.Namespace(output=tmpfilepath)
-                main()
-                self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
+            main(["-o",tmpfilepath,"--tac_agenda_gh_project_url","https://github.com/orgs/openmainframeproject/projects/21"])
+            self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
     
     @unittest.mock.patch.dict(os.environ, {"TAC_AGENDA_GH_PROJECT_URL": "https://github.com/orgs/openmainframeproject/projects/21"}, clear=True)
     @unittest.mock.patch('subprocess.run')
@@ -72,13 +63,11 @@ class TestUpdateTACAgendaItems(unittest.TestCase):
 
             with tempfile.TemporaryDirectory() as tempdir:
                 tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
-                with unittest.mock.patch('argparse.ArgumentParser.parse_args') as mock:
-                    mock.return_value = argparse.Namespace(output=tmpfilepath)
-                    main()
+                main(["-o",tmpfilepath,"--tac_agenda_gh_project_url","https://github.com/orgs/openmainframeproject/projects/21"])
 
-                    with open(tmpfilepath, 'r') as tmpfile:
-                        self.maxDiff = None
-                        self.assertEqual(tmpfile.read(),f'''title,url,number,scheduled_date,status,last_review_date,meeting_label
+                with open(tmpfilepath, 'r') as tmpfile:
+                    self.maxDiff = None
+                    self.assertEqual(tmpfile.read(),f'''title,url,number,scheduled_date,status,last_review_date,meeting_label
 D&I Working Group,https://github.com/AcademySoftwareFoundation/tac/issues/473,473,2024-12-11,Next Meeting Agenda Items,,{output}
 ''')
 

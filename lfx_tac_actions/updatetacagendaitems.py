@@ -13,14 +13,14 @@ import subprocess
 from urllib.parse import urlparse
 import argparse
 
-def main():
+def main(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("-o", "--output", help="filename to save output to",default='_data/tacmembers.csv')
     parser.add_argument("--tac_agenda_gh_project_url", help="URL to the TAC agenda GitHub Project",required=True)
-    args = parser.parse_args()
+    args = parser.parse_args(args)
     
     urlparts = urlparse(args.tac_agenda_gh_project_url).path.split('/')
-    if urlparts and urlparts[1] == 'orgs' and urlparts[3] == 'projects':
+    if urlparts and len(urlparts) >= 4 and urlparts[1] == 'orgs' and urlparts[3] == 'projects':
         command = subprocess.run("gh project item-list {gh_project_id} --owner {gh_org} --format json --limit 100".format(gh_project_id=urlparts[4],gh_org=urlparts[2]), shell=True, capture_output=True)
         json_project_data = command.stdout
         

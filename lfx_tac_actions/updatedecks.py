@@ -11,12 +11,12 @@ import re
 from pathlib import Path
 import argparse
 
-def main():
+def main(args=None):
     parser = argparse.ArgumentParser()
     parser.add_argument("--overview_decks", required=True, help="JSON array of Google Presentations to export ( format is '[{'url': GOOGLE-DRIVE-URL,'filename': EXPORT_FILENAME},...]' )")
     parser.add_argument("-o", "--output", help="location to save output to",default='.')
     parser.add_argument("--export_formats", help="Comma delimited lists of export formats", default="pdf,pptx")
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     documents = json.loads(args.overview_decks)
     for document in documents:
@@ -26,12 +26,13 @@ def main():
             match = re.search(pattern, document['url']) 
             if match:
                 try:
-                    contents = requests.get('https://docs.google.com/feeds/download/presentations/Export?id={docid}&exportFormat={exportFormat}'.format(docid=match.group(1),exportFormat=exportFormat),stream=False)
-                    with open(Path(args.output,document['filename']).with_suffix(f".{exportFormat.lstrip('.')}"), 'wb') as f:
-                        print("Writing file {}...".format(f.name))
-                        f.write(contents.content)
-                except HttpError as err:
-                    print(err.content)
+                    with requests.get('https://docs.google.com/feeds/download/presentations/Export?id={docid}&exportFormat={exportFormat}'.format(docid=match.group(1),exportFormat=exportFormat),stream=False) as response:
+                        response.raise_for_status()
+                        with open(Path(args.output,document['filename']).with_suffix(f".{exportFormat.lstrip('.')}"), 'wb') as f:
+                            print("Writing file {}...".format(f.name))
+                            f.write(response.content)
+                except Exception as e:
+                    print(f"An error occurred: {e}")
 
 if __name__ == '__main__':
     main()

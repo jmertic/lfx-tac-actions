@@ -11,11 +11,11 @@ from urllib.parse import urlparse
 import argparse
 from pathlib import Path
 
-def main():
+def main(args=None):
     parser = argparse.ArgumentParser()
-    parser.add_argument("-s", "--slug", help="Umbrella Foundation slug")
+    parser.add_argument("-s", "--slug", help="Umbrella Foundation slug", required=True)
     parser.add_argument("-o", "--output", help="location to save output to",default='.')
-    args = parser.parse_args()
+    args = parser.parse_args(args)
 
     endpointURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=parentSlug%20eq%20{}%20and%20status%20eq%20Active&pageSize=2000&orderBy=name'
 

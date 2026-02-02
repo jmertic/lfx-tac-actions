@@ -15,14 +15,11 @@ from lfx_tac_actions.updatetacmembers import main
 
 class TestUpdateTACMembers(unittest.TestCase):
     
-    @unittest.mock.patch.dict(os.environ, {"LFX_TAC_COMMITTEE_URL": ""}, clear=True)
     def testMainNoLFXTACCommitteeURL(self):
         with tempfile.TemporaryDirectory() as tempdir:
             tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
-            with unittest.mock.patch('argparse.ArgumentParser.parse_args') as mock:
-                mock.return_value = argparse.Namespace(output=tmpfilepath)
-                main()
-                self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
+            main(["-o",tmpfilepath,"--lfx_tac_committee_url",""])
+            self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
 
     def testMainBrokenTACCommitteeURLs(self):
         brokenurls = [
@@ -31,17 +28,12 @@ class TestUpdateTACMembers(unittest.TestCase):
             "https://projectadmin.lfx.linuxfoundation.org/project/a0941000002wBymAAE/collaboration/committee/163b26f7-a49b-40a3-89bb-e0592296c003",
             ]
         for brokenurl in brokenurls:
-            with unittest.mock.patch.dict(os.environ, {"LFX_TAC_COMMITTEE_URL": brokenurl}, clear=True):
-                with tempfile.TemporaryDirectory() as tempdir:
-                    tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
-
-                    with unittest.mock.patch('argparse.ArgumentParser.parse_args') as mock:
-                        mock.return_value = argparse.Namespace(output=tmpfilepath)
-                        main()
-                    self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
+            with tempfile.TemporaryDirectory() as tempdir:
+                tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
+                main(["-o",tmpfilepath,"--lfx_tac_committee_url",brokenurl])
+                self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
 
     @responses.activate
-    @unittest.mock.patch.dict(os.environ, {"LFX_TAC_COMMITTEE_URL": "https://projectadmin.lfx.linuxfoundation.org/project/a0941000002wBymAAE/collaboration/committees/163b26f7-a49b-40a3-89bb-e0592296c003"}, clear=True)
     def testMain(self):
         responses.add(
             method=responses.GET,
@@ -79,13 +71,11 @@ class TestUpdateTACMembers(unittest.TestCase):
             )
         with tempfile.TemporaryDirectory() as tempdir:
             tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
-            with unittest.mock.patch('argparse.ArgumentParser.parse_args') as mock:
-                mock.return_value = argparse.Namespace(output=tmpfilepath)
-                main()
+            main(["-o",tmpfilepath,"--lfx_tac_committee_url","https://projectadmin.lfx.linuxfoundation.org/project/a0941000002wBymAAE/collaboration/committees/163b26f7-a49b-40a3-89bb-e0592296c003"])
 
-                with open(tmpfilepath, 'r') as tmpfile:
-                    self.maxDiff = None
-                    self.assertEqual(tmpfile.read(),'''Full Name,Account Name: Account Name,Appointed By,Voting Status,Special Role,Title,HeadshotURL\nAndrea Orth,State Farm Mutual Automobile Insurance Company,Vote of TSC Committee,Voting Rep,None,Scrum Master,https://avatars0.githubusercontent.com/u/61636929?v=4\n''')
+            with open(tmpfilepath, 'r') as tmpfile:
+                self.maxDiff = None
+                self.assertEqual(tmpfile.read(),'''Full Name,Account Name: Account Name,Appointed By,Voting Status,Special Role,Title,HeadshotURL\nAndrea Orth,State Farm Mutual Automobile Insurance Company,Vote of TSC Committee,Voting Rep,None,Scrum Master,https://avatars0.githubusercontent.com/u/61636929?v=4\n''')
 
 if __name__ == '__main__':
     unittest.main()
