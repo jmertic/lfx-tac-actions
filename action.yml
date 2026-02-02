@@ -3,16 +3,48 @@ description: Action that syncs data from LFX into the TAC website
 inputs:
   landscape_url:
     description: "URL for the project's landscape"
+    required: false
     default: ""
-  artwork_url:
-    description: "URL for the project's artwork repo"
+  slug:
+    description: "Project slug as defined in LFX PCC"
+    required: false
     default: ""
   lfx_tac_committee_url:
     description: "URL to the committee in LFX"
+    required: false
     default: ""
   tac_agenda_gh_project_url:
     description: "URL for the GitHub Project in the TAC repo for managing TAC meeting agendas"
+    required: false
     default: ""
+  overview_decks:
+    description: "JSON array of Google Presentations to export ( format is '[{'url': GOOGLE-DRIVE-URL,'filename': EXPORT_FILENAME},...]' )"
+    required: false
+    default: ""
+  updateprojects:
+    description: "Run updateprojects"
+    required: false
+    default: 'true'
+  updatetacmembers:
+    description: "Run updatetacmembers"
+    required: false
+    default: 'true'
+  updatetacagendaitems:
+    description: "Run updatetacagendaitems" 
+    required: false
+    default: 'true'
+  updateclomonitor:
+    description: "Run updateclomonitor" 
+    required: false
+    default: 'false'
+  updatecharters:
+    description: "Run updatecharters" 
+    required: false
+    default: 'false'
+  updatedecks:
+    description: "Run updatedecks"
+    required: false
+    default: 'false'
 runs:
   using: composite
   steps:
@@ -26,7 +58,7 @@ runs:
       token: ${{ env.token }}
       repository: ${{ env.repository }}
       ref: ${{ env.ref }}
-      path: tac-repo
+      path: repo
   - name: Checkout lfx-tac-actions
     uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.1.7@v4
     with:
@@ -44,21 +76,42 @@ runs:
     working-directory: ./lfx-tac-actions
     run: |
       poetry install
-  - name: Run build
+  - name: Run updateprojects
     working-directory: ./lfx-tac-actions
     shell: bash
-    env:
-      LANDSCAPE_URL: ${{ inputs.landscape_url }}
-      ARTWORK_URL: ${{ inputs.artwork_url }}
-      LFX_TAC_COMMITTEE_URL: ${{ inputs.lfx_tac_committee_url }}
-      TAC_AGENDA_GH_PROJECT_URL: ${{ inputs.tac_agenda_gh_project_url }}
-      GH_TOKEN: ${{ env.token }}
-      GITHUB_TOKEN: ${{ env.token }}
+    if: inputs.updateprojects == 'true' && inputs.landscape_url != ''
     run: |
-      poetry run updateprojects -o ../tac-repo/_data/projects.csv
-      poetry run updatetacmembers -o ../tac-repo/_data/tacmembers.csv
-      poetry run updatetacagendaitems -o ../tac-repo/_data/meeting-agenda-items.csv
-      poetry run updateclomonitor -o ../tac-repo/_data/clomonitor.yaml
+      poetry run updateprojects -o ../repo/_data/projects.csv --landscape_url ${{ inputs.landscape_url }}
+  - name: Run updatetacmembers
+    working-directory: ./lfx-tac-actions
+    shell: bash
+    if: inputs.updatetacmembers == 'true' && inputs.lfx_tac_committee_url != ''
+    run: |
+      poetry run updatetacmembers -o ../repo/_data/tacmembers.csv --lfx_tac_committee_url ${{ inputs.lfx_tac_committee_url }}
+  - name: Run updatetacagendaitems
+    working-directory: ./lfx-tac-actions
+    shell: bash
+    if: inputs.updatetacagendaitems == 'true' && inputs.tac_agenda_gh_project_url != ''
+    run: |
+      poetry run updatetacagendaitems -o ../repo/_data/meeting-agenda-items.csv --tac_agenda_gh_project_url ${{ inputs.tac_agenda_gh_project_url }}
+  - name: Run updateclomonitor
+    working-directory: ./lfx-tac-actions
+    shell: bash
+    if: inputs.updateclomonitor == 'true' && inputs.landscape_url != ''
+    run: |
+      poetry run updateclomonitor -o ../repo/_data/meeting-agenda-items.csv --landscape_url ${{ inputs.landscape_url }}
+  - name: Run updatecharters
+    working-directory: ./lfx-tac-actions
+    shell: bash
+    if: inputs.updatecharters == 'true' && inputs.slug != ''
+    run: |
+      poetry run updatecharters -o ../repo/project_charters --slug ${{ inputs.slug }}
+  - name: Run updatedecks
+    working-directory: ./lfx-tac-actions
+    shell: bash
+    if: inputs.updatedecks == 'true' && inputs.overview_decks != ''
+    run: |
+      poetry run updatedecks -o ../repo/overview_deck --overview_decks "${{ inputs.overview_decks }}"
   - name: Get current date
     id: date
     uses: Kaven-Universe/github-action-current-date-time@f2c12d90cff9c3e7b1f50430886e632fe31fcee1 # v1.4.0
