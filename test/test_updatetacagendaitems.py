@@ -21,6 +21,11 @@ class TestUpdateTACAgendaItems(unittest.TestCase):
             main(["-o",tmpfilepath,"--tac_agenda_gh_project_url",""])
             self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
 
+    def testBadLogLevel(self):
+        with self.assertRaises(ValueError) as cm:
+            main(["-l","BAD","--tac_agenda_gh_project_url","foo"])
+        self.assertIn('Invalid log level: BAD', str(cm.exception))
+
     def testMainBrokenTACAgendaUrls(self):
         brokenurls = [
             "https://google.com/d/d",
