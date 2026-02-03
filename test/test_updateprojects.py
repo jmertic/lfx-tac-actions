@@ -21,6 +21,11 @@ class TestUpdateProjects(unittest.TestCase):
             main(["-o",tmpfilepath,"--landscape_url",""])
             self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
 
+    def testBadLogLevel(self):
+        with self.assertRaises(ValueError) as cm:
+            main(["-l","BAD","--landscape_url","foo"])
+        self.assertIn('Invalid log level: BAD', str(cm.exception))
+
     @responses.activate
     def testMain(self):
         responses.add(
@@ -65,6 +70,10 @@ class TestUpdateProjects(unittest.TestCase):
                         "url": "https://github.com/vfx-rs/organization",
                         "languages": { },
                         "primary": True
+                      },
+                      {
+                        "url": "https://github.com/vfx-rs/organization2",
+                        "languages": { },
                       }
                     ],
                     "slack_url": "https://slack.aswf.io"

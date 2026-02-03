@@ -21,6 +21,24 @@ class TestUpdateCharters(unittest.TestCase):
             main(["-o",""])
         self.assertEqual(cm.exception.code, 2)
 
+    def testBadLogLevel(self):
+        with self.assertRaises(ValueError) as cm:
+            main(["-l","BAD","--slug","foo"])
+        self.assertIn('Invalid log level: BAD', str(cm.exception))
+
+    @responses.activate
+    def testMainBadURL(self):
+        responses.add(
+            method=responses.GET,
+            url="https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=parentSlug%20eq%20lfenergy%20and%20status%20eq%20Active&pageSize=2000&orderBy=name",
+            status=404,
+            body="Not here!"
+            )
+        
+        with self.assertLogs(level="CRITICAL") as cm:
+            main(["--slug","lfenergy"])
+        self.assertIn('Error getting charters at https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=parentSlug%20eq%20lfenergy%20and%20status%20eq%20Active&pageSize=2000&orderBy=name', str(cm.output[0]))
+
     @responses.activate
     def testMain(self):
         responses.add(
@@ -46,7 +64,12 @@ class TestUpdateCharters(unittest.TestCase):
                   "CharterURL": "https://github.com/lf-energy/foundation/blob/master/project_charters/fledgepower_charter.pdf",
                   "Name": "FledgePower",
                   "Slug": "fledgepower",
-                }
+                },
+                {
+                  "CharterURL": "https://badurl.com/badcharter.pdf",
+                  "Name": "Bad Project",
+                  "Slug": "badproject",
+                },
               ],
               "Metadata": {
                 "Offset": 0,
@@ -67,14 +90,24 @@ class TestUpdateCharters(unittest.TestCase):
             method=responses.GET,
             url="https://raw.githubusercontent.com/lf-energy/foundation/master/project_charters/fledgepower_charter.pdf",
             body="blah blah blah")
+        responses.add(
+            method=responses.GET,
+            url="https://badurl.com/badcharter.pdf",
+            status=404,
+            body="Not here!"
+            )
 
 
         with tempfile.TemporaryDirectory() as tempdir:
-            main(["-o",tempdir,"--slug","lfenergy"])
+            with self.assertLogs(level="ERROR") as cm:
+                main(["-o",tempdir,"--slug","lfenergy"])
+            
             self.assertTrue(os.path.isfile(Path(tempdir,"arras_charter.pdf")))
             self.assertFalse(os.path.isfile(Path(tempdir,"citrineos_charter.pdf")))
+            self.assertFalse(os.path.isfile(Path(tempdir,"badproject_charter.pdf")))
             self.assertTrue(os.path.isfile(Path(tempdir,"citylearn_charter.pdf")))
             self.assertTrue(os.path.isfile(Path(tempdir,"fledgepower_charter.pdf")))
+            self.assertIn("Error getting file https://badurl.com/badcharter.pdf - '404 Client Error: Not Found for url: https://badurl.com/badcharter.pdf", str(cm.output[0]))
 
 if __name__ == '__main__':
     unittest.main()

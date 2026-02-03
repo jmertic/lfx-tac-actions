@@ -21,6 +21,11 @@ class TestUpdateTACMembers(unittest.TestCase):
             main(["-o",tmpfilepath,"--lfx_tac_committee_url",""])
             self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
 
+    def testBadLogLevel(self):
+        with self.assertRaises(ValueError) as cm:
+            main(["-l","BAD","--lfx_tac_committee_url","foo"])
+        self.assertIn('Invalid log level: BAD', str(cm.exception))
+
     def testMainBrokenTACCommitteeURLs(self):
         brokenurls = [
             "https://projectadmin.lfx.linuxfoundation.org/dog/a0941000002wBymAAE/collaboration/committees/163b26f7-a49b-40a3-89bb-e0592296c003",
@@ -33,6 +38,23 @@ class TestUpdateTACMembers(unittest.TestCase):
                 main(["-o",tmpfilepath,"--lfx_tac_committee_url",brokenurl])
                 self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
 
+    @responses.activate
+    def testMainInvalidResponse(self):
+        responses.add(
+            method=responses.GET,
+            url="https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/a0941000002wBymAAE/committees/163b26f7-a49b-40a3-89bb-e0592296c003/members",
+            status=404,
+            body="Not here!"
+            )
+        
+        with tempfile.TemporaryDirectory() as tempdir:
+            tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
+            with self.assertLogs(level="CRITICAL") as cm:
+                main(["-o",tmpfilepath,"--lfx_tac_committee_url","https://projectadmin.lfx.linuxfoundation.org/project/a0941000002wBymAAE/collaboration/committees/163b26f7-a49b-40a3-89bb-e0592296c003"])
+
+            self.assertFalse(os.path.isfile(tmpfilepath))
+            self.assertIn("Error getting https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/a0941000002wBymAAE/committees/163b26f7-a49b-40a3-89bb-e0592296c003/members - 404 Client Error: Not Found for url: https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/a0941000002wBymAAE/committees/163b26f7-a49b-40a3-89bb-e0592296c003/members", str(cm.output[0]))
+            
     @responses.activate
     def testMain(self):
         responses.add(
