@@ -21,14 +21,14 @@ def main(args=None):
     documents = json.loads(args.overview_decks)
     for document in documents:
         print("Getting file {}...".format(document['url']))
-        for exportFormat in args.export_formats.split(","):
+        for export_format in args.export_formats.split(","):
             pattern = r"/presentation/d/([a-zA-Z0-9-_]+)"
             match = re.search(pattern, document['url']) 
             if match:
                 try:
-                    with requests.get('https://docs.google.com/feeds/download/presentations/Export?id={docid}&exportFormat={exportFormat}'.format(docid=match.group(1),exportFormat=exportFormat),stream=False) as response:
+                    with requests.get('https://docs.google.com/feeds/download/presentations/Export?id={docid}&exportFormat={export_format}'.format(docid=match.group(1),export_format=export_format),stream=False) as response:
                         response.raise_for_status()
-                        with open(Path(args.output,document['filename']).with_suffix(f".{exportFormat.lstrip('.')}"), 'wb') as f:
+                        with open(Path(args.output,document['filename']).with_suffix(f".{export_format.lstrip('.')}"), 'wb') as f:
                             print("Writing file {}...".format(f.name))
                             f.write(response.content)
                 except Exception as e:

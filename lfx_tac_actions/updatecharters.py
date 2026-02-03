@@ -17,11 +17,11 @@ def main(args=None):
     parser.add_argument("-o", "--output", help="location to save output to",default='.')
     args = parser.parse_args(args)
 
-    endpointURL = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=parentSlug%20eq%20{}%20and%20status%20eq%20Active&pageSize=2000&orderBy=name'
+    endpoint_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=parentSlug%20eq%20{}%20and%20status%20eq%20Active&pageSize=2000&orderBy=name'
 
-    with requests.get(endpointURL.format(args.slug)) as response:
-        projectList = response.json()
-        for record in projectList['Data']:
+    with requests.get(endpoint_url.format(args.slug)) as response:
+        projectlist = response.json()
+        for record in projectlist['Data']:
             if record.get('CharterURL'):
                 if record.get('CharterURL').startswith('https://github.com'):
                     record['CharterURL'] = record['CharterURL'].replace("/raw/","/").replace("/blob/","/").replace("https://github.com","https://raw.githubusercontent.com")

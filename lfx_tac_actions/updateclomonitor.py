@@ -41,8 +41,8 @@ def main(args=None):
                             artwork_data = artwork_response.json()
                             logo_url = '{}://{}{}{}'.format(urlparts.scheme,urlparts.netloc,urlparts.path,artwork_data.get(urlparts.path,{}).get('primary_logo'))
                             logo_url_dark = '{}://{}{}{}'.format(urlparts.scheme,urlparts.netloc,urlparts.path,artwork_data.get(urlparts.path,{}).get('dark_logo'))
-                    except:
-                        print(f"Error getting artwork repo file {artwork_response.url}")
+                    except Exception as e:
+                        print(f"Error getting artwork repo file {artwork_response.url} - error message '{e}'")
                 else:
                     logo_url = project.get('logo_url')
                     logo_url_dark = project.get('logo_url')
