@@ -45,6 +45,13 @@ def main(args=None):
         for repository in project.get('repositories',[]):
             if repository.get('primary'):
                 repo_url = repository.get('url')
+        calendar_url = ''
+        ical_url = ''
+        for other_link in project.get('other_links'):
+            if other_link.get("name") == 'Calendar':
+                calendar_url = other_link.get("url")
+            if other_link.get("name") == 'iCal':
+                ical_url = other_link.get("url")
 
         logging.info("Processing {}".format(project.get('name')))
         csv_rows.append({
@@ -57,9 +64,9 @@ def main(args=None):
             'Chair': project.get('annotations',{}).get('chair'),
             'TAC Representative': project.get('annotations',{}).get('TAC_representative'),
             'Documentation': project.get('extra',{}).get('documentation_url'),
-            'Calendar': project.get('annotations',{}).get('calendar_url'),
+            'Calendar': calendar_url,
             'Artwork': project.get('artwork_url'),
-            'iCal': project.get('annotations',{}).get('ical_url'),
+            'iCal': ical_url,
             'LFX Insights URL': project.get('devstats_url'),
             'Accepted Date': project.get('accepted_at'),
             'Last Review Date': project.get('latest_annual_review_at'),
