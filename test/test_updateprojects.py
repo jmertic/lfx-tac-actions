@@ -49,9 +49,7 @@ class TestUpdateProjects(unittest.TestCase):
                     "annotations": {
                       "slug": "aswf-language-interop-project",
                       "chair": "Scott Wilson",
-                      "ical_url": "https://webcal.prod.itx.linuxfoundation.org/lfx/lfv8NMKI8tcp96N5tb",
                       "next_annual_review_date": "2025-03-19",
-                      "calendar_url": "https://zoom-lfx.platform.linuxfoundation.org/meetings/aswf-language-interop-project",
                       "project_org": "https://github.com/vfx-rs"
                     },
                     "artwork_url": "https://artwork.aswf.io/projects/aswf-language-interop-project/",
@@ -65,6 +63,16 @@ class TestUpdateProjects(unittest.TestCase):
                     "mailing_list_url": "https://lists.aswf.io/g/wg-rust",
                     "maturity": "working-group",
                     "oss": True,
+                    "other_links": [
+                      {
+                        "name": "Calendar",
+                        "url": "https://zoom-lfx.platform.linuxfoundation.org/meetings/aswf-language-interop-project"
+                      },
+                      {
+                        "name": "iCal",
+                        "url": "https://webcal.prod.itx.linuxfoundation.org/lfx/lfv8NMKI8tcp96N5tb"
+                      }
+                    ],
                     "repositories": [
                       {
                         "url": "https://github.com/vfx-rs/organization",
