@@ -42,7 +42,7 @@ def main(args=None):
             try:
                 with requests.get(record['CharterURL'],stream=False) as response:
                     response.raise_for_status()
-                    root, extension = os.path.splitext(urlparse(record['CharterURL']).path)
+                    _, extension = os.path.splitext(urlparse(record['CharterURL']).path)
                     with open(Path(args.output,f"{record['Slug']}_charter").with_suffix(extension), 'wb') as f:
                         logging.info("Writing file {}".format(f.name))
                         f.write(response.content)
