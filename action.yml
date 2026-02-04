@@ -118,6 +118,7 @@ runs:
     with:
       format: "YYYY-MM-DD"
   - name: Create Pull Request
+    id: cpr
     uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
     with:
       token: ${{ env.token }}
@@ -127,9 +128,10 @@ runs:
       labels: automerge
       commit-message: Update Data Sources from LFX
       signoff: true
+      delete-branch: true
   - name: Enable Pull Request Automerge
     working-directory: ./repo
     shell: bash
-    run: gh pr merge --merge --auto "1"
+    run: gh pr merge --merge --auto "${{ steps.cpr.outputs.pull-request-number }}"
     env:
       GH_TOKEN: ${{ env.token }}
