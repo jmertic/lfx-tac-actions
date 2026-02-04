@@ -41,17 +41,7 @@ def main(args=None):
         categories.append("{category} / {subcategory}".format(category=project.get('category'),subcategory=project.get('subcategory')))
         for additional_category in project.get('additional_categories',[]):
             categories.append("{category} / {subcategory}".format(category=additional_category['category'],subcategory=additional_category['subcategory']))
-        repo_url = ''
-        for repository in project.get('repositories',[]):
-            if repository.get('primary'):
-                repo_url = repository.get('url')
-        calendar_url = ''
-        ical_url = ''
-        for other_link in project.get('other_links'):
-            if other_link.get("name") == 'Calendar':
-                calendar_url = other_link.get("url")
-            if other_link.get("name") == 'iCal':
-                ical_url = other_link.get("url")
+        other_links_lookup = {d['name']: d['url'] for d in project.get('other_links',[])}
 
         logging.info("Processing {}".format(project.get('name')))
         csv_rows.append({
@@ -64,9 +54,9 @@ def main(args=None):
             'Chair': project.get('annotations',{}).get('chair'),
             'TAC Representative': project.get('annotations',{}).get('TAC_representative'),
             'Documentation': project.get('extra',{}).get('documentation_url'),
-            'Calendar': calendar_url,
+            'Calendar': other_links_lookup.get('Calendar'),
             'Artwork': project.get('artwork_url'),
-            'iCal': ical_url,
+            'iCal': other_links_lookup.get('iCal'),
             'LFX Insights URL': project.get('devstats_url'),
             'Accepted Date': project.get('accepted_at'),
             'Last Review Date': project.get('latest_annual_review_at'),
@@ -76,7 +66,7 @@ def main(args=None):
             'Mailing List': project.get('mailing_list_url'),
             'Github Org': project.get('annotations',{}).get('project_org'),
             'Best Practices Badge ID': project.get('bestPracticeBadgeId') ,
-            'Primary Github Repo': repo_url,
+            'Primary Github Repo': next((d['url'] for d in project.get('repositories',[]) if d['primary']), None),
             'Contributed By': project.get('annotations',{}).get('contributed_by'),
             })
 
