@@ -133,6 +133,6 @@ runs:
     if: steps.cpr.outputs.pull-request-number != ''
     working-directory: ./repo
     shell: bash
-    run: gh pr merge --merge --auto "${{ steps.cpr.outputs.pull-request-number }}"
+    run: gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}"
     env:
       GH_TOKEN: ${{ env.token }}
