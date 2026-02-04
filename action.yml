@@ -130,6 +130,7 @@ runs:
       signoff: true
       delete-branch: true
   - name: Enable Pull Request Automerge
+    if: steps.cpr.outputs.pull-request-number != ''
     working-directory: ./repo
     shell: bash
     run: gh pr merge --merge --auto "${{ steps.cpr.outputs.pull-request-number }}"
