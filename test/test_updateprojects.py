@@ -47,7 +47,6 @@ class TestUpdateProjects(unittest.TestCase):
                       }
                     ],
                     "annotations": {
-                      "slug": "aswf-language-interop-project",
                       "chair": "Scott Wilson",
                       "next_annual_review_date": "2025-03-19",
                       "project_org": "https://github.com/vfx-rs"
@@ -60,6 +59,7 @@ class TestUpdateProjects(unittest.TestCase):
                     "devstats_url": "https://insights.lfx.linuxfoundation.org/foundation/aswf/overview?project=aswf-language-interop-project",
                     "latest_annual_review_at": "2024-03-20",
                     "latest_annual_review_url": "https://github.com/AcademySoftwareFoundation/tac/issues/489",
+                    "lfx_slug": "aswf-language-interop-project",
                     "mailing_list_url": "https://lists.aswf.io/g/wg-rust",
                     "maturity": "working-group",
                     "oss": True,

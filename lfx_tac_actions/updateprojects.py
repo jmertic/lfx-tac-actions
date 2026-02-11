@@ -48,7 +48,7 @@ def main(args=None):
             'Name': project.get('name'),
             'Level': project.get('maturity'),
             'Logo URL': project.get('logo_url'),
-            'Slug': project.get('annotations',{}).get('slug'),
+            'Slug': project.get('annotations',{}).get('slug',project.get('lfx_slug')),
             'Categories': ','.join(categories),
             'Website': project.get('homepage_url'),
             'Chair': project.get('annotations',{}).get('chair'),
