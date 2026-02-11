@@ -53,7 +53,6 @@ class TestUpdateCLOMonitor(unittest.TestCase):
                     ],
                     "annotations": {
                       "ical_url": "https://webcal.prod.itx.linuxfoundation.org/lfx/a092M00001If9v8QAB",
-                      "slug": "opencolorio",
                       "chair": "Carol Payne",
                       "calendar_url": "https://zoom-lfx.platform.linuxfoundation.org/meetings/opencolorio",
                       "next_annual_review_date": "2025-01-22"
@@ -64,6 +63,7 @@ class TestUpdateCLOMonitor(unittest.TestCase):
                     "devstats_url": "https://insights.lfx.linuxfoundation.org/foundation/aswf/overview?project=opencolorio",
                     "latest_annual_review_at": "2023-11-01",
                     "latest_annual_review_url": "https://github.com/AcademySoftwareFoundation/tac/issues/474",
+                    "lfx_slug": "opencolorio",
                     "mailing_list_url": "https://lists.aswf.io/g/ocio-user",
                     "maturity": "emeritus",
                     "oss": True,

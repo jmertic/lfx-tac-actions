@@ -61,7 +61,7 @@ def main(args=None):
             logo_url_dark = project.get('logo_url')
 
         project_entry = {
-            'name': project.get('annotations',{}).get('slug'),
+            'name': project.get('annotations',{}).get('slug',project.get('lfx_slug')),
             'display_name': project.get('name'),
             'description': project.get('description'),
             'category': 'Visual Effects and Computer Graphics',
