@@ -92,6 +92,8 @@ runs:
     working-directory: ./lfx-tac-actions
     shell: bash
     if: inputs.updatetacagendaitems == 'true' && inputs.tac_agenda_gh_project_url != ''
+    env:
+      GH_TOKEN: ${{ env.token }}
     run: |
       poetry run updatetacagendaitems -o ../repo/_data/meeting-agenda-items.csv --tac_agenda_gh_project_url ${{ inputs.tac_agenda_gh_project_url }}
   - name: Run updateclomonitor
