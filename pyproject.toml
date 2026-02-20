@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lfx-tac-actions"
-version = "20241115"
+version = "20260220"
 description = "GitHub Action to sync data from LFX to a TAC repository"
 authors = ["John Mertic <jmertic@linuxfoundation.org>"]
 license = "Apache-2.0"
