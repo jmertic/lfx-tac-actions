@@ -13,7 +13,7 @@ import argparse
 import logging
 
 def main(args=None):
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Exports Google Slides and Powerpoint decks from Google Drive, saving them in PDF and PPTX format in a specified directory.")
     parser.add_argument("--overview_decks", required=True, help="JSON array of Google Presentations to export ( format is '[{'url': GOOGLE-DRIVE-URL,'filename': EXPORT_FILENAME},...]' )")
     parser.add_argument("-o", "--output", help="location to save output to",default='.')
     parser.add_argument("--export_formats", help="Comma delimited lists of export formats", default="pdf,pptx")
@@ -30,7 +30,7 @@ def main(args=None):
         logging.info("Getting file {}".format(document['url']))
         for export_format in args.export_formats.split(","):
             pattern = r"/presentation/d/([a-zA-Z0-9-_]+)"
-            match = re.search(pattern, document['url']) 
+            match = re.search(pattern, document['url'])
             if match:
                 try:
                     with requests.get('https://docs.google.com/feeds/download/presentations/Export?id={docid}&exportFormat={export_format}'.format(docid=match.group(1),export_format=export_format),stream=False) as response:

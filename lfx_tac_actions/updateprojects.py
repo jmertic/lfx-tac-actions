@@ -14,12 +14,12 @@ import urllib.parse
 import logging
 
 def main(args=None):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-o", "--output", help="filename to save output to",default='_data/projects.csv')
+    parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape into a CSV file.")
+    parser.add_argument("-o", "--output", help="filename to save output to",default='projects.csv')
     parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     parser.add_argument("--landscape_url", help="URL to the project's landscape",required=True)
     args = parser.parse_args(args)
-    
+
     numeric_level = getattr(logging, args.log_level.upper(), None)
     if not isinstance(numeric_level, int):
         raise ValueError(f'Invalid log level: {args.log_level}')
@@ -35,7 +35,7 @@ def main(args=None):
     except Exception as e:
         logging.critical(f"Error getting landscape_url {landscape_hosted_projects} - '{e}'")
         return
-            
+
     for project in project_data:
         categories = []
         categories.append("{category} / {subcategory}".format(category=project.get('category'),subcategory=project.get('subcategory')))
@@ -73,7 +73,7 @@ def main(args=None):
     with open(args.output, 'w') as csv_file_object:
         logging.info("Saving file {}".format(args.output))
         writer = csv.DictWriter(csv_file_object, fieldnames = csv_rows[0].keys())
-        writer.writeheader() 
+        writer.writeheader()
         writer.writerows(csv_rows)
 
 if __name__ == '__main__':
