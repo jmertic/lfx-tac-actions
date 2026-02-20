@@ -30,15 +30,15 @@ inputs:
     required: false
     default: 'true'
   updatetacagendaitems:
-    description: "Run updatetacagendaitems" 
+    description: "Run updatetacagendaitems"
     required: false
     default: 'true'
   updateclomonitor:
-    description: "Run updateclomonitor" 
+    description: "Run updateclomonitor"
     required: false
     default: 'false'
   updatecharters:
-    description: "Run updatecharters" 
+    description: "Run updatecharters"
     required: false
     default: 'false'
   updatedecks:

@@ -6,7 +6,7 @@
 LFX Actions are a series of tools that can be either ran directly at the CLI or leveraged via GitHub Actions, which automate pulling data from LFX for using with other tools and services. The current list of tools provided is as below:
 
 - `updateprojects` pulls hosted project data from a project's landscape into a CSV file.
-- `updatetacmembers` pull the current list of TAC members from LFX PCC into a CSV file.
+- `updatetacmembers` pulls the current list of TAC members from LFX PCC into a CSV file.
 - `updatetacagendaitems` is for TACs that use a GitHub Project for managing their TAC agenda; the tool exports the data into a CSV file.
 - `updateclomonitor` pulls hosted project data from a project's landscape into a file that can imported into [CLOMonitor](https://github.com/cncf/clomonitor)
 - `updatecharters` pulls the Technical Charters for the subprojects of a project, saving them in a specified directory with naming format of `SLUG_charter`

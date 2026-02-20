@@ -14,8 +14,8 @@ import os
 import logging
 
 def main(args=None):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-o", "--output", help="filename to save output to",default='_data/clomonitor.yaml')
+    parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape into a file that can imported into CLOMonitor.")
+    parser.add_argument("-o", "--output", help="filename to save output to",default='clomonitor.yaml')
     parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     parser.add_argument("--landscape_url", help="URL to the project's landscape",required=True)
     args = parser.parse_args(args)
@@ -40,7 +40,7 @@ def main(args=None):
         if project.get('maturity') == 'emeritus':
             continue
         logging.info("Processing {}".format(project.get('name')))
-    
+
         # grab correct logo from artwork repo
         logo_url = ''
         logo_url_dark = ''

@@ -15,17 +15,17 @@ import argparse
 import logging
 
 def main(args=None):
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-o", "--output", help="filename to save output to",default='_data/tacmembers.csv')
+    parser = argparse.ArgumentParser(description="A tool for TACs that use a GitHub Project for managing their TAC agenda; the tool exports the data into a CSV file.")
+    parser.add_argument("-o", "--output", help="filename to save output to",default='tacmembers.csv')
     parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     parser.add_argument("--tac_agenda_gh_project_url", help="URL to the TAC agenda GitHub Project",required=True)
     args = parser.parse_args(args)
-    
+
     numeric_level = getattr(logging, args.log_level.upper(), None)
     if not isinstance(numeric_level, int):
         raise ValueError(f'Invalid log level: {args.log_level}')
     logging.basicConfig(level=numeric_level,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    
+
     urlparts = urlparse(args.tac_agenda_gh_project_url).path.split('/')
     if not urlparts or len(urlparts) < 5 or urlparts[1] != 'orgs' or urlparts[3] != 'projects':
         logging.critical(f"Invalid value for tac_agenda_gh_project_url - {args.tac_agenda_gh_project_url}")
@@ -39,7 +39,7 @@ def main(args=None):
     except ValueError:
         logging.error(f"Invalid response from gh client: {command.stderr}")
         return
-    
+
     for item in project_data.get('items',[]):
         logging.info("Processing {item['content']['title']}")
         meeting_item = {
@@ -69,7 +69,7 @@ def main(args=None):
     with open(args.output, 'w') as csv_file_object:
         logging.info(f"Saving file {args.output}")
         writer = csv.DictWriter(csv_file_object, fieldnames = csv_rows[0].keys())
-        writer.writeheader() 
+        writer.writeheader()
         writer.writerows(csv_rows)
 
 if __name__ == '__main__':
