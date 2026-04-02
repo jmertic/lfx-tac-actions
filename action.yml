@@ -49,7 +49,7 @@ runs:
   using: composite
   steps:
   - name: Harden Runner
-    uses: step-security/harden-runner@5ef0c079ce82195b2a36a210272d6b661572d83e # v2.14.2
+    uses: step-security/harden-runner@fa2e9d605c4eeb9fcad4c99c224cee0c6c7f3594 # v2.16.0
     with:
       egress-policy: audit
   - name: Check out repo
@@ -116,7 +116,7 @@ runs:
       poetry run updatedecks -o ../repo/overview_deck --overview_decks '${{ inputs.overview_decks }}'
   - name: Get current date
     id: date
-    uses: Kaven-Universe/github-action-current-date-time@f2c12d90cff9c3e7b1f50430886e632fe31fcee1 # v1.4.0
+    uses: Kaven-Universe/github-action-current-date-time@7c1d8465d1bfd7d35466d2ee82a8e460780561ae # v1.5.0
     with:
       format: "YYYY-MM-DD"
   - name: Create Pull Request

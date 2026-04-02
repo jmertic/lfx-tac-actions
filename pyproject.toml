@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lfx-tac-actions"
-version = "20241115"
+version = "20260220"
 description = "GitHub Action to sync data from LFX to a TAC repository"
 authors = ["John Mertic <jmertic@linuxfoundation.org>"]
 license = "Apache-2.0"
@@ -9,7 +9,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.12"
 pyyaml = "^6.0.2"
-requests = "^2.32.4"
+requests = "^2.33.0"
 
 [tool.poetry.group.test.dependencies]
 coverage = "^7.6.4"
