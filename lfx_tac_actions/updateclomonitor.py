@@ -39,35 +39,34 @@ def main(args=None):
     for project in project_data:
         if project.get('maturity') == 'emeritus':
             continue
-        logging.info("Processing {}".format(project.get('name')))
+        logging.info(f"Processing {project.get('name')}")
 
         # grab correct logo from artwork repo
-        logo_url = ''
-        logo_url_dark = ''
         if project.get('artwork_url'):
             urlparts = urllib.parse.urlparse(project.get('artwork_url'))
             try:
-                with requests.get('{}://{}/assets/data.json'.format(urlparts.scheme,urlparts.netloc)) as artwork_response:
+                with requests.get(f"{urlparts.scheme}://{urlparts.netloc}/assets/data.json") as artwork_response:
                     artwork_response.raise_for_status()
                     artwork_data = artwork_response.json()
-                    logo_url = '{}://{}{}{}'.format(urlparts.scheme,urlparts.netloc,urlparts.path,artwork_data.get(urlparts.path,{}).get('primary_logo'))
-                    logo_url_dark = '{}://{}{}{}'.format(urlparts.scheme,urlparts.netloc,urlparts.path,artwork_data.get(urlparts.path,{}).get('dark_logo'))
+                    if artwork_data.get(urlparts.path):
+                        project['clotributor_category'] = artwork_data.get(urlparts.path,{}).get('clotributor_category')
+                        project['logo_url'] = f"{urlparts.scheme}://{urlparts.netloc}{urlparts.path}{artwork_data.get(urlparts.path,{}).get('primary_logo')}"
+                        if artwork_data.get(urlparts.path,{}).get('primary_logo') != artwork_data.get(urlparts.path,{}).get('dark_logo'):
+                            project['logo_dark_url'] = f"{urlparts.scheme}://{urlparts.netloc}{urlparts.path}{artwork_data.get(urlparts.path,{}).get('dark_logo')}"
+                        logging.info(f"Setting logo_url to {project.get('logo_url')} and logo_dark_url to {project.get('logo_dark_url')} from {project.get('artwork_url')}")
             except Exception as e:
                 logging.error(f"Error getting artwork repo file {artwork_response.url} - error message '{e}'")
-                logo_url = project.get('logo_url')
-                logo_url_dark = project.get('logo_url')
-        else:
-            logo_url = project.get('logo_url')
-            logo_url_dark = project.get('logo_url')
+        if project.get('maturity') == 'long-term-working-group':
+            project['maturity'] = 'working-group'
 
         project_entry = {
-            'name': project.get('annotations',{}).get('slug',project.get('lfx_slug')),
+            'name': project.get('lfx_slug'),
             'display_name': project.get('name'),
             'description': project.get('description'),
-            'category': 'Visual Effects and Computer Graphics',
-            'logo_url': logo_url,
-            'logo_url_dark': logo_url_dark,
-            'devstats_url': project.get('dev_stats_url'),
+            'category': project.get('clotributor_category'),
+            'logo_url': project.get('logo_url'),
+            'logo_dark_url': project.get('logo_dark_url'),
+            'devstats_url': project.get('devstats_url'),
             'maturity': project.get('maturity'),
             'repositories': []
         }
@@ -78,10 +77,11 @@ def main(args=None):
                 'exclude': ['clomonitor']
             })
         if project_entry.get('repositories',[]) != []:
-            project_entries.append(project_entry)
+            logging.info(f"Adding {project.get('name')}")
+            project_entries.append({k: v for k, v in project_entry.items() if v})
 
     with open(args.output, 'w') as clomonitor_file_object:
-        logging.info("Saving file {}".format(args.output))
+        logging.info(f"Saving file {args.output}")
         yaml.dump(project_entries, clomonitor_file_object, sort_keys=False, indent=2)
 
 if __name__ == '__main__':

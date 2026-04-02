@@ -14,14 +14,14 @@ import argparse
 from lfx_tac_actions.updateclomonitor import main
 
 class TestUpdateCLOMonitor(unittest.TestCase):
-    
+
     def testMainNoLandscapeUrl(self):
         with tempfile.TemporaryDirectory() as tempdir:
             tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.yaml')
             main(["-o",tmpfilepath,"--landscape_url",""])
-        
+
         self.assertLogs("Error getting landscape_url api/projects/all.json - error message 'Invalid URL 'api/projects/all.json': No scheme supplied. Perhaps you meant https://api/projects/all.json?", level='CRITICAL')
-    
+
     def testBadLogLevel(self):
         with self.assertRaises(ValueError) as cm:
             main(["-l","BAD","--landscape_url","foo"])
@@ -104,7 +104,7 @@ class TestUpdateCLOMonitor(unittest.TestCase):
             with open(tmpfilepath, 'r') as tmpfile:
                 self.maxDiff = None
                 self.assertEqual(tmpfile.read(),'''[]\n''')
-    
+
     @responses.activate
     def testMainInvalidArtworkUrl(self):
         responses.add(
@@ -137,7 +137,6 @@ class TestUpdateCLOMonitor(unittest.TestCase):
                     ],
                     "annotations": {
                       "ical_url": "https://webcal.prod.itx.linuxfoundation.org/lfx/a092M00001If9v8QAB",
-                      "slug": "opencolorio",
                       "chair": "Carol Payne",
                       "calendar_url": "https://zoom-lfx.platform.linuxfoundation.org/meetings/opencolorio",
                       "next_annual_review_date": "2025-01-22"
@@ -149,6 +148,7 @@ class TestUpdateCLOMonitor(unittest.TestCase):
                     "devstats_url": "https://insights.lfx.linuxfoundation.org/foundation/aswf/overview?project=opencolorio",
                     "latest_annual_review_at": "2023-11-01",
                     "latest_annual_review_url": "https://github.com/AcademySoftwareFoundation/tac/issues/474",
+                    "lfx_slug": "opencolorio",
                     "mailing_list_url": "https://lists.aswf.io/g/ocio-user",
                     "maturity": "adopted",
                     "oss": True,
@@ -195,10 +195,8 @@ class TestUpdateCLOMonitor(unittest.TestCase):
   description: The OpenColorIO project is committed to providing an industry standard
     solution for highly precise, performant, and consistent color management across
     digital content creation applications and pipelines.
-  category: Visual Effects and Computer Graphics
   logo_url: https://aswf.landscape2.io/logos/2d4849a9c8ebf6d6e9e1096d191e88739c4abd47754620e7a1c5244ebe14aa05.svg
-  logo_url_dark: https://aswf.landscape2.io/logos/2d4849a9c8ebf6d6e9e1096d191e88739c4abd47754620e7a1c5244ebe14aa05.svg
-  devstats_url: null
+  devstats_url: https://insights.lfx.linuxfoundation.org/foundation/aswf/overview?project=opencolorio
   maturity: adopted
   repositories:
   - name: OpenColorIO
@@ -237,7 +235,6 @@ class TestUpdateCLOMonitor(unittest.TestCase):
                     ],
                     "annotations": {
                       "ical_url": "https://webcal.prod.itx.linuxfoundation.org/lfx/a092M00001If9v8QAB",
-                      "slug": "opencolorio",
                       "chair": "Carol Payne",
                       "calendar_url": "https://zoom-lfx.platform.linuxfoundation.org/meetings/opencolorio",
                       "next_annual_review_date": "2025-01-22"
@@ -248,6 +245,7 @@ class TestUpdateCLOMonitor(unittest.TestCase):
                     "devstats_url": "https://insights.lfx.linuxfoundation.org/foundation/aswf/overview?project=opencolorio",
                     "latest_annual_review_at": "2023-11-01",
                     "latest_annual_review_url": "https://github.com/AcademySoftwareFoundation/tac/issues/474",
+                    "lfx_slug": "opencolorio",
                     "mailing_list_url": "https://lists.aswf.io/g/ocio-user",
                     "maturity": "adopted",
                     "oss": True,
@@ -292,10 +290,8 @@ class TestUpdateCLOMonitor(unittest.TestCase):
   description: The OpenColorIO project is committed to providing an industry standard
     solution for highly precise, performant, and consistent color management across
     digital content creation applications and pipelines.
-  category: Visual Effects and Computer Graphics
   logo_url: https://aswf.landscape2.io/logos/2d4849a9c8ebf6d6e9e1096d191e88739c4abd47754620e7a1c5244ebe14aa05.svg
-  logo_url_dark: https://aswf.landscape2.io/logos/2d4849a9c8ebf6d6e9e1096d191e88739c4abd47754620e7a1c5244ebe14aa05.svg
-  devstats_url: null
+  devstats_url: https://insights.lfx.linuxfoundation.org/foundation/aswf/overview?project=opencolorio
   maturity: adopted
   repositories:
   - name: OpenColorIO
@@ -317,6 +313,7 @@ class TestUpdateCLOMonitor(unittest.TestCase):
                     "/projects/opencolorio/": {
                         "name": "OpenColorIO",
                         "category": "Adopted Projects",
+                        "clotributor_category": "Visual Effects and Computer Graphics",
                         "primary_logo": "stacked/color/opencolorio-stacked-color.svg",
                         "dark_logo": "stacked/color/opencolorio-stacked-color.svg",
                         }
@@ -348,7 +345,6 @@ class TestUpdateCLOMonitor(unittest.TestCase):
                     ],
                     "annotations": {
                       "ical_url": "https://webcal.prod.itx.linuxfoundation.org/lfx/a092M00001If9v8QAB",
-                      "slug": "opencolorio",
                       "chair": "Carol Payne",
                       "calendar_url": "https://zoom-lfx.platform.linuxfoundation.org/meetings/opencolorio",
                       "next_annual_review_date": "2025-01-22"
@@ -360,6 +356,7 @@ class TestUpdateCLOMonitor(unittest.TestCase):
                     "devstats_url": "https://insights.lfx.linuxfoundation.org/foundation/aswf/overview?project=opencolorio",
                     "latest_annual_review_at": "2023-11-01",
                     "latest_annual_review_url": "https://github.com/AcademySoftwareFoundation/tac/issues/474",
+                    "lfx_slug": "opencolorio",
                     "mailing_list_url": "https://lists.aswf.io/g/ocio-user",
                     "maturity": "adopted",
                     "oss": True,
@@ -406,8 +403,7 @@ class TestUpdateCLOMonitor(unittest.TestCase):
     digital content creation applications and pipelines.
   category: Visual Effects and Computer Graphics
   logo_url: https://artwork.aswf.io/projects/opencolorio/stacked/color/opencolorio-stacked-color.svg
-  logo_url_dark: https://artwork.aswf.io/projects/opencolorio/stacked/color/opencolorio-stacked-color.svg
-  devstats_url: null
+  devstats_url: https://insights.lfx.linuxfoundation.org/foundation/aswf/overview?project=opencolorio
   maturity: adopted
   repositories:
   - name: OpenColorIO
