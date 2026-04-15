@@ -37,7 +37,7 @@ jobs:
 
       - name: Update README.md
         run: |
-          # Matches: uses: jmertic/lfx-landscape-tools@[anything] # [anything]
+          # Matches: uses: jmertic/lfx-tac-actions@[anything] # [anything]
           # Replaces with the new SHA and current date
           sed -i "s|uses: jmertic/lfx-tac-actions@.* # .*|uses: jmertic/lfx-tac-actions@${{ steps.meta.outputs.SHA }} # ${{ steps.meta.outputs.VERSION }}|" README.md
 
