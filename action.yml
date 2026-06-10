@@ -107,7 +107,7 @@ runs:
     shell: bash
     if: inputs.updatecharters == 'true' && inputs.slug != ''
     run: |
-      poetry run updatecharters -o ../repo/project_charters --slug ${{ inputs.slug }}
+      poetry run updatecharters -o ../repo/project_charters --slug ${{ inputs.slug }} -l INFO
   - name: Run updatedecks
     working-directory: ./lfx-tac-actions
     shell: bash
