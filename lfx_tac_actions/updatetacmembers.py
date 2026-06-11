@@ -38,7 +38,7 @@ def main(args=None):
         committee_url_response.raise_for_status()
         committee_url_response_json = committee_url_response.json()
     except Exception as e:
-        logging.critical(f"Error getting {committee_url_response.url} - {e}")
+        logging.critical(f"Error getting {committee_url.format(project_id=urlparts[2],committee_id=urlparts[5])} - {e}")
         return
 
     for committee_member in committee_url_response_json.get('Data',[]):
