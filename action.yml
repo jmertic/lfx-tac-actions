@@ -58,62 +58,42 @@ runs:
       token: ${{ env.token }}
       repository: ${{ env.repository }}
       ref: ${{ env.ref }}
-      path: repo
-  - name: Checkout lfx-tac-actions
-    uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v4.1.7@v4
-    with:
-      token: ${{ env.token }}
-      repository: jmertic/lfx-tac-actions
-      path: lfx-tac-actions
-  - name: Set up Python 3.x
-    uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
-    with:
-      python-version: '3.x'
-  - name: Install poetry
-    uses: abatilo/actions-poetry@3765cf608f2d4a72178a9fc5b918668e542b89b1 # v4.0.0
-  - name: Install dependencies
+  - name: Install lfx-tac-actions via pipx
     shell: bash
-    working-directory: ./lfx-tac-actions
     run: |
-      poetry install
+      pipx install git+https://github.com/jmertic/lfx-tac-actions.git
   - name: Run updateprojects
-    working-directory: ./lfx-tac-actions
     shell: bash
     if: inputs.updateprojects == 'true' && inputs.landscape_url != ''
     run: |
-      poetry run updateprojects -o ../repo/_data/projects.csv --landscape_url ${{ inputs.landscape_url }}
+      updateprojects -o _data/projects.csv --landscape_url ${{ inputs.landscape_url }}
   - name: Run updatetacmembers
-    working-directory: ./lfx-tac-actions
     shell: bash
     if: inputs.updatetacmembers == 'true' && inputs.lfx_tac_committee_url != ''
     run: |
-      poetry run updatetacmembers -o ../repo/_data/tacmembers.csv --lfx_tac_committee_url ${{ inputs.lfx_tac_committee_url }}
+      updatetacmembers -o _data/tacmembers.csv --lfx_tac_committee_url ${{ inputs.lfx_tac_committee_url }}
   - name: Run updatetacagendaitems
-    working-directory: ./lfx-tac-actions
     shell: bash
     if: inputs.updatetacagendaitems == 'true' && inputs.tac_agenda_gh_project_url != ''
     env:
       GH_TOKEN: ${{ env.token }}
     run: |
-      poetry run updatetacagendaitems -o ../repo/_data/meeting-agenda-items.csv --tac_agenda_gh_project_url ${{ inputs.tac_agenda_gh_project_url }}
+      updatetacagendaitems -o _data/meeting-agenda-items.csv --tac_agenda_gh_project_url ${{ inputs.tac_agenda_gh_project_url }}
   - name: Run updateclomonitor
-    working-directory: ./lfx-tac-actions
     shell: bash
     if: inputs.updateclomonitor == 'true' && inputs.landscape_url != ''
     run: |
-      poetry run updateclomonitor -o ../repo/_data/meeting-agenda-items.csv --landscape_url ${{ inputs.landscape_url }}
+      updateclomonitor -o _data/meeting-agenda-items.csv --landscape_url ${{ inputs.landscape_url }}
   - name: Run updatecharters
-    working-directory: ./lfx-tac-actions
     shell: bash
     if: inputs.updatecharters == 'true' && inputs.slug != ''
     run: |
-      poetry run updatecharters -o ../repo/project_charters --slug ${{ inputs.slug }} -l INFO
+      updatecharters -o project_charters --slug ${{ inputs.slug }} -l INFO
   - name: Run updatedecks
-    working-directory: ./lfx-tac-actions
     shell: bash
     if: inputs.updatedecks == 'true' && inputs.overview_decks != ''
     run: |
-      poetry run updatedecks -o ../repo/overview_deck --overview_decks '${{ inputs.overview_decks }}'
+      updatedecks -o overview_deck --overview_decks '${{ inputs.overview_decks }}'
   - name: Get current date
     id: date
     uses: Kaven-Universe/github-action-current-date-time@7c1d8465d1bfd7d35466d2ee82a8e460780561ae # v1.5.0
@@ -125,7 +105,6 @@ runs:
     with:
       token: ${{ env.token }}
       branch-suffix: timestamp
-      path: ./repo
       title: "Update Data Sources from LFX ${{ steps.date.outputs.time }}"
       labels: automerge
       commit-message: Update Data Sources from LFX
@@ -133,7 +112,6 @@ runs:
       delete-branch: true
   - name: Enable Pull Request Automerge
     if: steps.cpr.outputs.pull-request-number != ''
-    working-directory: ./repo
     shell: bash
     run: |
       gh pr merge --squash --auto "${{ steps.cpr.outputs.pull-request-number }}" \
