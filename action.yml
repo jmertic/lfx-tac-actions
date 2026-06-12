@@ -61,7 +61,21 @@ runs:
   - name: Install lfx-tac-actions via pipx
     shell: bash
     run: |
-      pipx install git+https://github.com/jmertic/lfx-tac-actions.git@330472720c08c9156105951f1041b281b8921525
+      # 1. Try the action reference (works for tags/branches)
+      TARGET_VERSION="${{ github.action_ref }}"
+      
+      # 2. If blank, try to extract the checked-out SHA of this action
+      if [ -z "$TARGET_VERSION" ] && [ -d "${{ github.action_path }}" ]; then
+        TARGET_VERSION=$(git -C "${{ github.action_path }}" rev-parse HEAD 2>/dev/null || echo "")
+      fi
+      
+      # 3. Final fallback if everything else is blank or fails
+      if [ -z "$TARGET_VERSION" ]; then
+        TARGET_VERSION="master"
+      fi
+
+      echo "Installing lfx-tac-actions at version: $TARGET_VERSION"
+      pipx install git+https://github.com/jmertic/lfx-tac-actions.git@$TARGET_VERSION
   - name: Run updateprojects
     shell: bash
     if: inputs.updateprojects == 'true' && inputs.landscape_url != ''
