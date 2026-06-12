@@ -61,7 +61,7 @@ runs:
   - name: Install lfx-tac-actions via pipx
     shell: bash
     run: |
-      pipx install git+https://github.com/jmertic/lfx-tac-actions.git
+      pipx install git+https://github.com/jmertic/lfx-tac-actions.git@330472720c08c9156105951f1041b281b8921525
   - name: Run updateprojects
     shell: bash
     if: inputs.updateprojects == 'true' && inputs.landscape_url != ''
