@@ -13,7 +13,7 @@ requests = "^2.33.0"
 
 [tool.poetry.group.test.dependencies]
 coverage = "^7.6.4"
-responses = "^0.25.3"
+responses = ">=0.25.3,<0.27.0"
 
 [tool.poetry.scripts]
 updateprojects = "lfx_tac_actions.updateprojects:main"
