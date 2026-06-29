@@ -14,6 +14,18 @@ import os
 import logging
 import ipaddress
 import socket
+from pathlib import Path
+
+def sanitize_output_path(user_input, target_extension=".yaml"):
+    # Convert input to a Path object
+    path = Path(user_input)
+
+    # Check if the path already ends with the target extension (case-insensitive)
+    if path.suffix.lower() != target_extension.lower():
+        # If it doesn't, append the extension to the existing name
+        path = path.with_name(f"{path.name}{target_extension}")
+
+    return path
 
 def load_from_artwork_repo(artwork_url):
     urlparts = urllib.parse.urlparse(artwork_url)
@@ -134,8 +146,8 @@ def main(args=None):
             logging.info(f"Adding {project.get('name')}")
             project_entries.append({k: v for k, v in project_entry.items() if v})
 
-    with open(args.output, 'w') as clomonitor_file_object:
-        logging.info(f"Saving file {args.output}")
+    with open(sanitize_output_path(args.output), 'w') as clomonitor_file_object:
+        logging.info(f"Saving file {clomonitor_file_object.name}")
         yaml.dump(project_entries, clomonitor_file_object, sort_keys=False, indent=2)
 
 if __name__ == '__main__':
