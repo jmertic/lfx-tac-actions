@@ -12,6 +12,18 @@ import json
 import os
 from urllib.parse import urlparse
 import logging
+from pathlib import Path
+
+def sanitize_output_path(user_input, target_extension=".csv"):
+    # Convert input to a Path object
+    path = Path(user_input)
+    
+    # Check if the path already ends with the target extension (case-insensitive)
+    if path.suffix.lower() != target_extension.lower():
+        # If it doesn't, append the extension to the existing name
+        path = path.with_name(f"{path.name}{target_extension}")
+        
+    return path
 
 def main(args=None):
     parser = argparse.ArgumentParser(description="Pulls the current list of TAC members from LFX PCC into a CSV file.")
@@ -53,8 +65,8 @@ def main(args=None):
             'HeadshotURL': committee_member.get('LogoURL')
             })
 
-    with open(args.output, 'w') as csv_file_object:
-        logging.info("Saving file {}".format(args.output))
+    with open(sanitize_output_path(args.output), 'w') as csv_file_object:
+        logging.info(f"Saving file csv_file_object.name")
         writer = csv.DictWriter(csv_file_object, fieldnames = csv_rows[0].keys())
         writer.writeheader()
         writer.writerows(csv_rows)

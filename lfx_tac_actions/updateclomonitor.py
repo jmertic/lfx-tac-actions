@@ -12,6 +12,8 @@ import urllib.parse
 import json
 import os
 import logging
+import ipaddress
+import socket
 
 def load_from_artwork_repo(artwork_url):
     urlparts = urllib.parse.urlparse(artwork_url)
@@ -31,6 +33,43 @@ def load_from_artwork_repo(artwork_url):
 
     return project
 
+def is_safe_url(url):
+    """
+    Validates the URL to prevent SSRF by ensuring it uses HTTP/HTTPS
+    and does not resolve to local, loopback, or private IP addresses.
+    """
+    try:
+        parsed_url = urllib.parse.urlparse(url)
+
+        # 1. Enforce HTTP/HTTPS protocol
+        if parsed_url.scheme not in ('http', 'https'):
+            logging.error(f"Invalid URL scheme: {parsed_url.scheme}. Only HTTP and HTTPS are allowed.")
+            return False
+
+        # 2. Enforce presence of a hostname
+        hostname = parsed_url.hostname
+        if not hostname:
+            logging.error("URL is missing a valid hostname.")
+            return False
+
+        # 3. Resolve hostname to an IP address and check if it's private/loopback
+        # Note: If your environment relies on a local proxy, you may need to adjust this.
+        try:
+            ip_address_str = socket.gethostbyname(hostname)
+            ip_obj = ipaddress.ip_address(ip_address_str)
+
+            if ip_obj.is_private or ip_obj.is_loopback:
+                logging.error(f"URL resolves to a restricted local/private IP address: {ip_address_str}")
+                return False
+        except socket.gaierror:
+            logging.error(f"Could not resolve hostname: {hostname}")
+            return False
+
+        return True
+    except Exception as e:
+        logging.error(f"URL validation failed with error: {e}")
+        return False
+
 def main(args=None):
     parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape into a file that can imported into CLOMonitor.")
     parser.add_argument("-o", "--output", help="filename to save output to",default='clomonitor.yaml')
@@ -42,6 +81,10 @@ def main(args=None):
     if not isinstance(numeric_level, int):
         raise ValueError(f'Invalid log level: {args.log_level}')
     logging.basicConfig(level=numeric_level,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    if not is_safe_url(args.landscape_url):
+        logging.critical("Execution aborted due to unsafe landscape_url.")
+        return
 
     project_entries = []
 

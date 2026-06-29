@@ -7,10 +7,13 @@
 
 import requests
 import os
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote
 import argparse
 from pathlib import Path
 import logging
+import re
+
+from pathvalidate import is_valid_filepath, ValidationError
 
 def main(args=None):
     parser = argparse.ArgumentParser(description="Downloads the Technical Charters for the subprojects of a project identified by --slug, saving them in a specified directory with naming format of `SLUG_charter`.")
@@ -26,8 +29,20 @@ def main(args=None):
 
     endpoint_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=parentSlug%20eq%20{}%20and%20status%20eq%20Active&pageSize=2000&orderBy=name'
 
+    if not is_valid_filepath(args.output, platform="auto"):
+        logging.critical(f"Security Error: The path '{parsed_args.output}' contains invalid characters or structures.")
+        return
+
+    # Validate the string to prevent SSRF / Injection. A standard slug should only contain alphanumeric characters and hyphens.
+    if not re.match(r'^[a-zA-Z0-9-]+$', args.slug):
+        logging.critical(f"Invalid slug format: '{args.slug}'. Slugs must only contain alphanumeric characters and hyphens.")
+        return
+
+    # Safely URL-encode the validated slug just as a secondary defense mechanism
+    safe_slug = quote(args.slug)
+
     try:
-        response = requests.get(endpoint_url.format(args.slug))
+        response = requests.get(endpoint_url.format(safe_slug))
         response.raise_for_status()
         projectlist = response.json()
     except Exception as e:
