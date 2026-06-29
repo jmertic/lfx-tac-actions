@@ -67,7 +67,7 @@ def is_safe_url(url):
 
         return True
     except Exception as e:
-        logging.error(f"URL validation failed with error: {e}")
+        logging.exception(f"URL validation failed with error: {e}")
         return False
 
 def main(args=None):

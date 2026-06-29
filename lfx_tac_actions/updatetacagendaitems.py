@@ -13,6 +13,18 @@ import subprocess
 from urllib.parse import urlparse
 import argparse
 import logging
+from pathlib import Path
+
+def sanitize_output_path(user_input, target_extension=".csv"):
+    # Convert input to a Path object
+    path = Path(user_input)
+
+    # Check if the path already ends with the target extension (case-insensitive)
+    if path.suffix.lower() != target_extension.lower():
+        # If it doesn't, append the extension to the existing name
+        path = path.with_name(f"{path.name}{target_extension}")
+
+    return path
 
 def main(args=None):
     parser = argparse.ArgumentParser(description="A tool for TACs that use a GitHub Project for managing their TAC agenda; the tool exports the data into a CSV file.")
@@ -66,8 +78,8 @@ def main(args=None):
             meeting_item['meeting_label'] = None
         csv_rows.append(meeting_item)
 
-    with open(args.output, 'w') as csv_file_object:
-        logging.info(f"Saving file {args.output}")
+    with open(sanitize_output_path(args.output), 'w') as csv_file_object:
+        logging.info(f"Saving file {csv_file_object.name}")
         writer = csv.DictWriter(csv_file_object, fieldnames = csv_rows[0].keys())
         writer.writeheader()
         writer.writerows(csv_rows)
