@@ -13,6 +13,24 @@ import json
 import os
 import logging
 
+def load_from_artwork_repo(artwork_url):
+    urlparts = urllib.parse.urlparse(artwork_url)
+    project = {}
+    try:
+        with requests.get(f"{urlparts.scheme}://{urlparts.netloc}/assets/data.json") as artwork_response:
+            artwork_response.raise_for_status()
+            artwork_data = artwork_response.json()
+            if artwork_data.get(urlparts.path):
+                project['clotributor_category'] = artwork_data.get(urlparts.path,{}).get('clotributor_category')
+                project['logo_url'] = f"{urlparts.scheme}://{urlparts.netloc}{urlparts.path}{artwork_data.get(urlparts.path,{}).get('primary_logo')}"
+                if artwork_data.get(urlparts.path,{}).get('primary_logo') != artwork_data.get(urlparts.path,{}).get('dark_logo'):
+                    project['logo_dark_url'] = f"{urlparts.scheme}://{urlparts.netloc}{urlparts.path}{artwork_data.get(urlparts.path,{}).get('dark_logo')}"
+                logging.info(f"Setting logo_url to {project.get('logo_url')} and logo_dark_url to {project.get('logo_dark_url')} from {project.get('artwork_url')}")
+    except Exception as e:
+        logging.error(f"Error getting artwork repo file {artwork_response.url} - error message '{e}'")
+
+    return project
+
 def main(args=None):
     parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape into a file that can imported into CLOMonitor.")
     parser.add_argument("-o", "--output", help="filename to save output to",default='clomonitor.yaml')
@@ -43,19 +61,12 @@ def main(args=None):
 
         # grab correct logo from artwork repo
         if project.get('artwork_url'):
-            urlparts = urllib.parse.urlparse(project.get('artwork_url'))
-            try:
-                with requests.get(f"{urlparts.scheme}://{urlparts.netloc}/assets/data.json") as artwork_response:
-                    artwork_response.raise_for_status()
-                    artwork_data = artwork_response.json()
-                    if artwork_data.get(urlparts.path):
-                        project['clotributor_category'] = artwork_data.get(urlparts.path,{}).get('clotributor_category')
-                        project['logo_url'] = f"{urlparts.scheme}://{urlparts.netloc}{urlparts.path}{artwork_data.get(urlparts.path,{}).get('primary_logo')}"
-                        if artwork_data.get(urlparts.path,{}).get('primary_logo') != artwork_data.get(urlparts.path,{}).get('dark_logo'):
-                            project['logo_dark_url'] = f"{urlparts.scheme}://{urlparts.netloc}{urlparts.path}{artwork_data.get(urlparts.path,{}).get('dark_logo')}"
-                        logging.info(f"Setting logo_url to {project.get('logo_url')} and logo_dark_url to {project.get('logo_dark_url')} from {project.get('artwork_url')}")
-            except Exception as e:
-                logging.error(f"Error getting artwork repo file {artwork_response.url} - error message '{e}'")
+            logging.info(f'Loading data from project.get("artwork_url")')
+            artwork_data = load_from_artwork_repo(project.get('artwork_url'))
+            project['clotributor_category'] = artwork_data.get('clotributor_category')
+            project['logo_url'] = artwork_data.get('logo_url')
+            project['logo_dark_url'] = artwork_data.get('logo_dark_url')
+
         if project.get('maturity') == 'long-term-working-group':
             project['maturity'] = 'working-group'
 
