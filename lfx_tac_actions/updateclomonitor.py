@@ -27,7 +27,7 @@ def load_from_artwork_repo(artwork_url):
                     project['logo_dark_url'] = f"{urlparts.scheme}://{urlparts.netloc}{urlparts.path}{artwork_data.get(urlparts.path,{}).get('dark_logo')}"
                 logging.info(f"Setting logo_url to {project.get('logo_url')} and logo_dark_url to {project.get('logo_dark_url')} from {project.get('artwork_url')}")
     except Exception as e:
-        logging.error(f"Error getting artwork repo file {artwork_response.url} - error message '{e}'")
+        logging.exception(f"Error getting artwork repo file {artwork_response.url} - error message '{e}'")
 
     return project
 
@@ -64,7 +64,7 @@ def main(args=None):
             logging.info(f'Loading data from project.get("artwork_url")')
             artwork_data = load_from_artwork_repo(project.get('artwork_url'))
             project['clotributor_category'] = artwork_data.get('clotributor_category')
-            project['logo_url'] = artwork_data.get('logo_url')
+            project['logo_url'] = artwork_data.get('logo_url') or project['logo_url']
             project['logo_dark_url'] = artwork_data.get('logo_dark_url')
 
         if project.get('maturity') == 'long-term-working-group':

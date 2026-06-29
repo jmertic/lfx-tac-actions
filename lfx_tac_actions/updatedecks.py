@@ -39,7 +39,7 @@ def main(args=None):
                             logging.info("Writing file {}".format(f.name))
                             f.write(response.content)
                 except Exception as e:
-                    logging.error(f"Error getting overview deck {document['url']} - {e}")
+                    logging.exception(f"Error getting overview deck {document['url']} - {e}")
             else:
                 logging.error(f"Invalid Google Presentation URL {document['url']}")
 
