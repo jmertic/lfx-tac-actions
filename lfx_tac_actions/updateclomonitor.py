@@ -61,7 +61,7 @@ def main(args=None):
 
         # grab correct logo from artwork repo
         if project.get('artwork_url'):
-            logging.info(f'Loading data from project.get("artwork_url")')
+            logging.info("Loading data from %s", project.get("artwork_url"))
             artwork_data = load_from_artwork_repo(project.get('artwork_url'))
             project['clotributor_category'] = artwork_data.get('clotributor_category')
             project['logo_url'] = artwork_data.get('logo_url') or project['logo_url']

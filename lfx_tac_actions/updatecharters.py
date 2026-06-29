@@ -47,7 +47,7 @@ def main(args=None):
                         logging.info("Writing file {}".format(f.name))
                         f.write(response.content)
             except Exception as e:
-                logging.error(f"Error getting file {record['CharterURL']} - '{e}'")
+                logging.exception(f"Error getting file {record['CharterURL']} - '{e}'")
 
 if __name__ == '__main__':
     main()
