@@ -15,6 +15,12 @@ import logging
 from pathvalidate.argparse import validate_filepath_arg
 from pathvalidate import is_valid_filename
 
+def setup_logging(log_level):
+    numeric_level = getattr(logging, log_level.upper(), None)
+    if not isinstance(numeric_level, int):
+        raise ValueError(f'Invalid log level: {log_level}')
+    logging.basicConfig(level=numeric_level,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
 def main(args=None):
     parser = argparse.ArgumentParser(description="Exports Google Slides and Powerpoint decks from Google Drive, saving them in PDF and PPTX format in a specified directory.")
     parser.add_argument("--overview_decks", required=True, help="JSON array of Google Presentations to export ( format is '[{'url': GOOGLE-DRIVE-URL,'filename': EXPORT_FILENAME},...]' )")
@@ -23,10 +29,7 @@ def main(args=None):
     parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     args = parser.parse_args(args)
 
-    numeric_level = getattr(logging, args.log_level.upper(), None)
-    if not isinstance(numeric_level, int):
-        raise ValueError(f'Invalid log level: {args.log_level}')
-    logging.basicConfig(level=numeric_level,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    setup_logging(args.log_level)
 
     documents = json.loads(args.overview_decks)
     for document in documents:

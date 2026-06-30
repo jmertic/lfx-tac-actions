@@ -36,6 +36,18 @@ def load_from_artwork_repo(artwork_url):
 
     return project
 
+def parse_repositories(repos):
+    returnrepos = []
+
+    for repo in repos:
+        returnrepos.append({
+            'name': repo.get('url').rsplit('/', 1)[-1],
+            'url': repo.get('url'),
+            'exclude': ['clomonitor']
+        })
+
+    return returnrepos
+
 def is_safe_url(url):
     """
     Validates the URL to prevent SSRF by ensuring it uses HTTP/HTTPS
@@ -73,6 +85,12 @@ def is_safe_url(url):
         logging.exception(f"URL validation failed with error: {e}")
         return False
 
+def setup_logging(log_level):
+    numeric_level = getattr(logging, log_level.upper(), None)
+    if not isinstance(numeric_level, int):
+        raise ValueError(f'Invalid log level: {log_level}')
+    logging.basicConfig(level=numeric_level,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
 def main(args=None):
     parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape into a file that can imported into CLOMonitor.")
     parser.add_argument("-o", "--output", help="filename to save output to",default='clomonitor.yaml',type=validate_filepath_arg)
@@ -80,13 +98,11 @@ def main(args=None):
     parser.add_argument("--landscape_url", help="URL to the project's landscape",required=True)
     args = parser.parse_args(args)
 
-    numeric_level = getattr(logging, args.log_level.upper(), None)
-    if not isinstance(numeric_level, int):
-        raise ValueError(f'Invalid log level: {args.log_level}')
-    logging.basicConfig(level=numeric_level,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    setup_logging(args.log_level)
 
     if Path(args.output).suffix.lower() != '.yaml':
         logging.critical(f"Output filename {args.output} is invalid (must have extension '.yaml')")
+        return
 
     if not is_safe_url(args.landscape_url):
         logging.critical("Execution aborted due to unsafe landscape_url.")
@@ -130,12 +146,7 @@ def main(args=None):
             'maturity': project.get('maturity'),
             'repositories': []
         }
-        for repo in project.get('repositories',[]):
-            project_entry['repositories'].append({
-                'name': repo.get('url').rsplit('/', 1)[-1],
-                'url': repo.get('url'),
-                'exclude': ['clomonitor']
-            })
+        project_entry['repositories'] = parse_repositories(project.get('repositories',[]))
         if project_entry.get('repositories',[]) != []:
             logging.info(f"Adding {project.get('name')}")
             project_entries.append({k: v for k, v in project_entry.items() if v})
