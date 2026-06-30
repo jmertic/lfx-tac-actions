@@ -18,17 +18,6 @@ from pathlib import Path
 
 from pathvalidate.argparse import validate_filename_arg, validate_filepath_arg
 
-def sanitize_output_path(user_input, target_extension=".yaml"):
-    # Convert input to a Path object
-    path = Path(user_input)
-
-    # Check if the path already ends with the target extension (case-insensitive)
-    if path.suffix.lower() != target_extension.lower():
-        # If it doesn't, append the extension to the existing name
-        path = path.with_name(f"{path.name}{target_extension}")
-
-    return path
-
 def load_from_artwork_repo(artwork_url):
     urlparts = urllib.parse.urlparse(artwork_url)
     project = {}
@@ -96,6 +85,9 @@ def main(args=None):
         raise ValueError(f'Invalid log level: {args.log_level}')
     logging.basicConfig(level=numeric_level,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
+    if Path(args.output).suffix.lower() != '.yaml':
+        logging.critical(f"Output filename {args.output} is invalid (must have extension '.yaml')")
+
     if not is_safe_url(args.landscape_url):
         logging.critical("Execution aborted due to unsafe landscape_url.")
         return
@@ -148,7 +140,7 @@ def main(args=None):
             logging.info(f"Adding {project.get('name')}")
             project_entries.append({k: v for k, v in project_entry.items() if v})
 
-    with open(sanitize_output_path(args.output), 'w') as clomonitor_file_object:
+    with open(args.output, 'w') as clomonitor_file_object:
         logging.info(f"Saving file {clomonitor_file_object.name}")
         yaml.dump(project_entries, clomonitor_file_object, sort_keys=False, indent=2)
 
