@@ -12,10 +12,13 @@ import os
 import argparse
 import urllib.parse
 import logging
+from pathlib import Path
+
+from pathvalidate.argparse import validate_filepath_arg
 
 def main(args=None):
     parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape into a CSV file.")
-    parser.add_argument("-o", "--output", help="filename to save output to",default='projects.csv')
+    parser.add_argument("-o", "--output", help="filename to save output to",default='projects.csv',type=validate_filepath_arg)
     parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     parser.add_argument("--landscape_url", help="URL to the project's landscape",required=True)
     args = parser.parse_args(args)
@@ -24,6 +27,9 @@ def main(args=None):
     if not isinstance(numeric_level, int):
         raise ValueError(f'Invalid log level: {args.log_level}')
     logging.basicConfig(level=numeric_level,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    if Path(args.output).suffix.lower() != '.csv':
+        logging.critical(f"Output filename {args.output} is invalid (must have extension '.csv')")
 
     landscape_hosted_projects = urllib.parse.urljoin(args.landscape_url,'api/projects/all.json')
 
@@ -71,7 +77,7 @@ def main(args=None):
             })
 
     with open(args.output, 'w') as csv_file_object:
-        logging.info("Saving file {}".format(args.output))
+        logging.info(f"Saving file {csv_file_object.name}")
         writer = csv.DictWriter(csv_file_object, fieldnames = csv_rows[0].keys())
         writer.writeheader()
         writer.writerows(csv_rows)
