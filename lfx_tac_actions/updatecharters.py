@@ -13,12 +13,12 @@ from pathlib import Path
 import logging
 import re
 
-from pathvalidate import is_valid_filepath, ValidationError
+from pathvalidate.argparse import validate_filename_arg, validate_filepath_arg
 
 def main(args=None):
     parser = argparse.ArgumentParser(description="Downloads the Technical Charters for the subprojects of a project identified by --slug, saving them in a specified directory with naming format of `SLUG_charter`.")
     parser.add_argument("-s", "--slug", help="Umbrella Foundation slug", required=True)
-    parser.add_argument("-o", "--output", help="location to save output to",default='.')
+    parser.add_argument("-o", "--output", help="location to save output to", default='.', type=validate_filepath_arg)
     parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     args = parser.parse_args(args)
 
@@ -28,10 +28,6 @@ def main(args=None):
     logging.basicConfig(level=numeric_level,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
     endpoint_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=parentSlug%20eq%20{}%20and%20status%20eq%20Active&pageSize=2000&orderBy=name'
-
-    if not is_valid_filepath(args.output, platform="auto"):
-        logging.critical(f"Security Error: The path '{parsed_args.output}' contains invalid characters or structures.")
-        return
 
     # Validate the string to prevent SSRF / Injection. A standard slug should only contain alphanumeric characters and hyphens.
     if not re.match(r'^[a-zA-Z0-9-]+$', args.slug):

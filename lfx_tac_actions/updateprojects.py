@@ -14,20 +14,11 @@ import urllib.parse
 import logging
 from pathlib import Path
 
-def sanitize_output_path(user_input, target_extension=".csv"):
-    # Convert input to a Path object
-    path = Path(user_input)
-
-    # Check if the path already ends with the target extension (case-insensitive)
-    if path.suffix.lower() != target_extension.lower():
-        # If it doesn't, append the extension to the existing name
-        path = path.with_name(f"{path.name}{target_extension}")
-
-    return path
+from pathvalidate.argparse import validate_filepath_arg
 
 def main(args=None):
     parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape into a CSV file.")
-    parser.add_argument("-o", "--output", help="filename to save output to",default='projects.csv')
+    parser.add_argument("-o", "--output", help="filename to save output to",default='projects.csv',type=validate_filepath_arg)
     parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     parser.add_argument("--landscape_url", help="URL to the project's landscape",required=True)
     args = parser.parse_args(args)
@@ -36,6 +27,9 @@ def main(args=None):
     if not isinstance(numeric_level, int):
         raise ValueError(f'Invalid log level: {args.log_level}')
     logging.basicConfig(level=numeric_level,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+    if Path(args.output).suffix.lower() != '.csv':
+        logging.critical(f"Output filename {args.output} is invalid (must have extension '.csv')")
 
     landscape_hosted_projects = urllib.parse.urljoin(args.landscape_url,'api/projects/all.json')
 
@@ -82,7 +76,7 @@ def main(args=None):
             'Contributed By': project.get('annotations',{}).get('contributed_by'),
             })
 
-    with open(sanitize_output_path(args.output), 'w') as csv_file_object:
+    with open(args.output, 'w') as csv_file_object:
         logging.info(f"Saving file {csv_file_object.name}")
         writer = csv.DictWriter(csv_file_object, fieldnames = csv_rows[0].keys())
         writer.writeheader()

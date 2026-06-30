@@ -16,6 +16,8 @@ import ipaddress
 import socket
 from pathlib import Path
 
+from pathvalidate.argparse import validate_filename_arg, validate_filepath_arg
+
 def sanitize_output_path(user_input, target_extension=".yaml"):
     # Convert input to a Path object
     path = Path(user_input)
@@ -84,7 +86,7 @@ def is_safe_url(url):
 
 def main(args=None):
     parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape into a file that can imported into CLOMonitor.")
-    parser.add_argument("-o", "--output", help="filename to save output to",default='clomonitor.yaml')
+    parser.add_argument("-o", "--output", help="filename to save output to",default='clomonitor.yaml',type=validate_filepath_arg)
     parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     parser.add_argument("--landscape_url", help="URL to the project's landscape",required=True)
     args = parser.parse_args(args)
