@@ -104,6 +104,7 @@ runs:
     shell: bash
     if: inputs.updatecharters == 'true' && inputs.slug != ''
     run: |
+      find project_charters/ -maxdepth 1 -type f ! -name 'README.md' -delete
       updatecharters -o project_charters --slug ${{ inputs.slug }} -l INFO
   - name: Run updatedecks
     shell: bash
