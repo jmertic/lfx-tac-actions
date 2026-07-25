@@ -7,15 +7,18 @@
 
 import requests
 import os
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote
 import argparse
 from pathlib import Path
 import logging
+import re
+
+from pathvalidate.argparse import validate_filename_arg, validate_filepath_arg
 
 def main(args=None):
     parser = argparse.ArgumentParser(description="Downloads the Technical Charters for the subprojects of a project identified by --slug, saving them in a specified directory with naming format of `SLUG_charter`.")
     parser.add_argument("-s", "--slug", help="Umbrella Foundation slug", required=True)
-    parser.add_argument("-o", "--output", help="location to save output to",default='.')
+    parser.add_argument("-o", "--output", help="location to save output to", default='.', type=validate_filepath_arg)
     parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     args = parser.parse_args(args)
 
@@ -26,8 +29,16 @@ def main(args=None):
 
     endpoint_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=parentSlug%20eq%20{}%20and%20status%20eq%20Active&pageSize=2000&orderBy=name'
 
+    # Validate the string to prevent SSRF / Injection. A standard slug should only contain alphanumeric characters and hyphens.
+    if not re.match(r'^[a-zA-Z0-9-]+$', args.slug):
+        logging.critical(f"Invalid slug format: '{args.slug}'. Slugs must only contain alphanumeric characters and hyphens.")
+        return
+
+    # Safely URL-encode the validated slug just as a secondary defense mechanism
+    safe_slug = quote(args.slug)
+
     try:
-        response = requests.get(endpoint_url.format(args.slug))
+        response = requests.get(endpoint_url.format(safe_slug))
         response.raise_for_status()
         projectlist = response.json()
     except Exception as e:
