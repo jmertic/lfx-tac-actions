@@ -12,6 +12,10 @@ import json
 import os
 from urllib.parse import urlparse
 import logging
+from pathlib import Path
+import re
+
+from pathvalidate.argparse import validate_filepath_arg
 
 def main(args=None):
     parser = argparse.ArgumentParser(description="Pulls the current list of TAC members from LFX PCC into a CSV file.")
@@ -27,18 +31,19 @@ def main(args=None):
 
     committee_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/{project_id}/committees/{committee_id}/members'
 
-    urlparts = urlparse(args.lfx_tac_committee_url).path.split('/')
-    if not urlparts or len(urlparts) < 5 or urlparts[1] != 'project' or urlparts[3] != 'collaboration' or urlparts[4] != 'committees':
+    pattern = r'^https://projectadmin\.lfx\.linuxfoundation\.org/project/(?P<project_id>[^/]+)/collaboration/committees/(?P<committee_id>[^/?#]+)$'
+    match = re.search(pattern, args.lfx_tac_committee_url)
+    if not match:
         logging.critical(f"Invalid value for lfx_tac_committee_url - {args.lfx_tac_committee_url}")
         return
 
     csv_rows = []
     try:
-        committee_url_response = requests.get(committee_url.format(project_id=urlparts[2],committee_id=urlparts[5]))
+        committee_url_response = requests.get(committee_url.format(project_id=match.group('project_id'),committee_id=match.group('committee_id')))
         committee_url_response.raise_for_status()
         committee_url_response_json = committee_url_response.json()
     except Exception as e:
-        logging.critical(f"Error getting {committee_url.format(project_id=urlparts[2],committee_id=urlparts[5])} - {e}")
+        logging.critical(f"Error getting {committee_url.format(project_id=match.group('project_id'),committee_id=match.group('committee_id'))} - {e}")
         return
 
     for committee_member in committee_url_response_json.get('Data',[]):

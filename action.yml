@@ -21,6 +21,10 @@ inputs:
     description: "JSON array of Google Presentations to export ( format is '[{'url': GOOGLE-DRIVE-URL,'filename': EXPORT_FILENAME},...]' )"
     required: false
     default: ""
+  updatecharters_output_dir:
+    description: "File location for saving charter from the `updatecharters` action"
+    required: false
+    default: "overview_deck"
   updateprojects:
     description: "Run updateprojects"
     required: false
@@ -63,14 +67,14 @@ runs:
     run: |
       # 1. Try github.action_ref (works for tags/branches)
       TARGET_VERSION="${{ github.action_ref }}"
-      
+
       # 2. If blank, check if the action was invoked via a specific commit SHA
       # GitHub stores the repository data in a hidden internal format we can parse
       if [ -z "$TARGET_VERSION" ]; then
         # Extracts the SHA from the tail end of the internal action path if present
         TARGET_VERSION=$(echo "${{ github.action_path }}" | grep -oE '[0-9a-f]{40}$')
       fi
-      
+
       # 3. Final safety fallback to main
       if [ -z "$TARGET_VERSION" ]; then
         TARGET_VERSION="main"
@@ -105,7 +109,7 @@ runs:
     if: inputs.updatecharters == 'true' && inputs.slug != ''
     run: |
       find project_charters/ -maxdepth 1 -type f ! -name 'README.md' -delete
-      updatecharters -o project_charters --slug ${{ inputs.slug }} -l INFO
+      updatecharters -o ${{ inputs.updatecharters_output_dir }} --slug ${{ inputs.slug }} -l INFO
   - name: Run updatedecks
     shell: bash
     if: inputs.updatedecks == 'true' && inputs.overview_decks != ''
