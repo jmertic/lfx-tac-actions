@@ -20,6 +20,5 @@ def get_landscape_endpoint(landscape_url):
 
     if landscape_url_parts.scheme not in ('http', 'https'):
         raise ValueError(f"Invalid URL scheme: {landscape_url_parts.scheme}. Only HTTP and HTTPS are allowed.")
-        return False
 
     return urlunsplit((landscape_url_parts.scheme, landscape_url_parts.netloc, "/api/projects/all.json", "", ""))
