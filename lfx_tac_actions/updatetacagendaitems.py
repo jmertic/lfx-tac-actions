@@ -11,15 +11,13 @@ import json
 import os
 import subprocess
 from urllib.parse import urlparse
-import argparse
 import logging
 from pathlib import Path
 
-from . import setup_logging
+from . import setup_logging, setup_argparse
 
 def main(args=None):
-    parser = argparse.ArgumentParser(description="A tool for TACs that use a GitHub Project for managing their TAC agenda. Streams TAC agenda items in CSV format to `stdout`.")
-    parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
+    parser = setup_argparse(description="A tool for TACs that use a GitHub Project for managing their TAC agenda. Streams TAC agenda items in CSV format to `stdout`.")
     parser.add_argument("--tac_agenda_gh_project_url", help="URL to the TAC agenda GitHub Project",required=True)
     args = parser.parse_args(args)
 
