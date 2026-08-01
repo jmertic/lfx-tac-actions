@@ -5,12 +5,12 @@
 
 LFX Actions are a series of tools that can be either ran directly at the CLI or leveraged via GitHub Actions, which automate pulling data from LFX for using with other tools and services. The current list of tools provided is as below:
 
-- `updateprojects` pulls hosted project data from a project's landscape into a CSV file.
-- `updatetacmembers` pulls the current list of TAC members from LFX PCC into a CSV file.
-- `updatetacagendaitems` is for TACs that use a GitHub Project for managing their TAC agenda; the tool exports the data into a CSV file.
-- `updateclomonitor` pulls hosted project data from a project's landscape into a file that can imported into [CLOMonitor](https://github.com/cncf/clomonitor)
-- `updatecharters` pulls the Technical Charters for the subprojects of a project, saving them in a specified directory with naming format of `SLUG_charter`
-- `updatedecks` exports Google Slides and Powerpoint decks from Google Drive, saving them in PDF and PPTX format in a specified directory.
+- `updateprojects`: Pulls hosted project data from a project's landscape and streams in CSV format to `stdout`.
+- `updatetacmembers`: Pulls the current list of TAC members from LFX PCC and streams CSV format to `stdout`.
+- `updatetacagendaitems`: A tool for TACs that use a GitHub Project for managing their TAC agenda. Streams TAC agenda items in CSV format to `stdout`..
+- `updateclomonitor`: Pulls hosted project data from a project's landscape in YAML format to `stdout` that can imported into [CLOMonitor](https://github.com/cncf/clomonitor).
+- `updatecharters`: Downloads the Technical Charters for the subprojects of a project identified by `--slug`, saving them in the current working directory with naming format of `SLUG_charter`.
+- `updatedecks`: Exports Google Slides and Powerpoint decks from Google Drive, saving them in PDF and PPTX format in the current working directory.
 
 You can run any of these commands with the `-h` flag to see the command line arguments required.
 

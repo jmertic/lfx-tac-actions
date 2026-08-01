@@ -12,16 +12,21 @@ import responses
 import argparse
 from pathlib import Path
 import re
+import io
+from unittest.mock import patch
 
 from lfx_tac_actions.updatedecks import main
 
 class TestUpdateDecks(unittest.TestCase):
-    
+
     def testMainNoArgs(self):
-        with self.assertRaises(SystemExit) as cm:
-            main(["-o",""])
+        with (
+            patch("sys.stderr", new=io.StringIO()),
+            self.assertRaises(SystemExit) as cm,
+        ):
+            main([])
         self.assertEqual(cm.exception.code, 2)
-    
+
     def testBadLogLevel(self):
         with self.assertRaises(ValueError) as cm:
             main(["-l","BAD","--overview_decks","foo"])
@@ -45,11 +50,15 @@ class TestUpdateDecks(unittest.TestCase):
             status=404,
             body="Not here!"
             )
-        
+
         with tempfile.TemporaryDirectory() as tempdir:
-            with self.assertLogs(level="ERROR") as cm:
-                main(["-o",tempdir,"--overview_decks",overview_decks])
-            
+            with (
+                patch.object(os, "chdir", os.chdir),
+                self.assertLogs(level="ERROR") as cm,
+            ):
+                os.chdir(tempdir)
+                main(["--overview_decks",overview_decks])
+
             self.assertIn("Error getting overview deck https://docs.google.com/presentation/d/1p0FoFJ7-IdDejisJPUYdq_uApn3XW3wJ/edit?usp=sharing&ouid=108330571292091021915&rtpof=true&sd=true - 404 Client Error: Not Found for url: https://docs.google.com/feeds/download/presentations/Export?id=1p0FoFJ7-IdDejisJPUYdq_uApn3XW3wJ&exportFormat=pdf", str(cm.output[0]))
             self.assertTrue(os.path.isfile(Path(tempdir,"ASWF High Level Overview.pdf")))
             self.assertTrue(os.path.isfile(Path(tempdir,"ASWF Governing Board Overview.pdf")))

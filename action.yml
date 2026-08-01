@@ -63,14 +63,14 @@ runs:
     run: |
       # 1. Try github.action_ref (works for tags/branches)
       TARGET_VERSION="${{ github.action_ref }}"
-      
+
       # 2. If blank, check if the action was invoked via a specific commit SHA
       # GitHub stores the repository data in a hidden internal format we can parse
       if [ -z "$TARGET_VERSION" ]; then
         # Extracts the SHA from the tail end of the internal action path if present
         TARGET_VERSION=$(echo "${{ github.action_path }}" | grep -oE '[0-9a-f]{40}$')
       fi
-      
+
       # 3. Final safety fallback to main
       if [ -z "$TARGET_VERSION" ]; then
         TARGET_VERSION="main"
@@ -82,34 +82,36 @@ runs:
     shell: bash
     if: inputs.updateprojects == 'true' && inputs.landscape_url != ''
     run: |
-      updateprojects -o _data/projects.csv --landscape_url ${{ inputs.landscape_url }}
+      updateprojects --landscape_url ${{ inputs.landscape_url }} -l INFO > _data/projects.csv
   - name: Run updatetacmembers
     shell: bash
     if: inputs.updatetacmembers == 'true' && inputs.lfx_tac_committee_url != ''
     run: |
-      updatetacmembers -o _data/tacmembers.csv --lfx_tac_committee_url ${{ inputs.lfx_tac_committee_url }}
+      updatetacmembers --lfx_tac_committee_url ${{ inputs.lfx_tac_committee_url }} -l INFO > _data/tacmembers.csv
   - name: Run updatetacagendaitems
     shell: bash
     if: inputs.updatetacagendaitems == 'true' && inputs.tac_agenda_gh_project_url != ''
     env:
       GH_TOKEN: ${{ env.token }}
     run: |
-      updatetacagendaitems -o _data/meeting-agenda-items.csv --tac_agenda_gh_project_url ${{ inputs.tac_agenda_gh_project_url }}
+      updatetacagendaitems --tac_agenda_gh_project_url ${{ inputs.tac_agenda_gh_project_url }} -l INFO > _data/meeting-agenda-items.csv
   - name: Run updateclomonitor
     shell: bash
     if: inputs.updateclomonitor == 'true' && inputs.landscape_url != ''
     run: |
-      updateclomonitor -o _data/meeting-agenda-items.csv --landscape_url ${{ inputs.landscape_url }}
+      updateclomonitor --landscape_url ${{ inputs.landscape_url }} -l INFO > _data/meeting-agenda-items.csv
   - name: Run updatecharters
     shell: bash
     if: inputs.updatecharters == 'true' && inputs.slug != ''
     run: |
-      updatecharters -o project_charters --slug ${{ inputs.slug }} -l INFO
+      mkdir -p project_charters
+      (cd project_charters && updatecharters --slug ${{ inputs.slug }} -l INFO)
   - name: Run updatedecks
     shell: bash
     if: inputs.updatedecks == 'true' && inputs.overview_decks != ''
     run: |
-      updatedecks -o overview_deck --overview_decks '${{ inputs.overview_decks }}'
+      mkdir -p overview_deck
+      (cd overview_deck && updatedecks --overview_decks '${{ inputs.overview_decks }}' -l INFO)
   - name: Get current date
     id: date
     uses: Kaven-Universe/github-action-current-date-time@7c1d8465d1bfd7d35466d2ee82a8e460780561ae # v1.5.0

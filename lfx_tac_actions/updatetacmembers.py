@@ -13,23 +13,19 @@ import os
 from urllib.parse import urlparse
 import logging
 from pathlib import Path
+import sys
 
 from pathvalidate.argparse import validate_filepath_arg
 
+from . import setup_logging
+
 def main(args=None):
-    parser = argparse.ArgumentParser(description="Pulls the current list of TAC members from LFX PCC into a CSV file.")
-    parser.add_argument("-o", "--output", help="filename to save output to",default='tacmembers.csv',type=validate_filepath_arg)
+    parser = argparse.ArgumentParser(description="Pulls the current list of TAC members from LFX PCC and streams CSV format to `stdout`.")
     parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     parser.add_argument("--lfx_tac_committee_url", help="URL to the TAC Committee in LFX PCC", required=True)
     args = parser.parse_args(args)
 
-    numeric_level = getattr(logging, args.log_level.upper(), None)
-    if not isinstance(numeric_level, int):
-        raise ValueError(f'Invalid log level: {args.log_level}')
-    logging.basicConfig(level=numeric_level,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-    if Path(args.output).suffix.lower() != '.csv':
-        logging.critical(f"Output filename {args.output} is invalid (must have extension '.csv')")
+    setup_logging(args.log_level)
 
     committee_url = 'https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/{project_id}/committees/{committee_id}/members'
 
@@ -59,11 +55,13 @@ def main(args=None):
             'HeadshotURL': committee_member.get('LogoURL')
             })
 
-    with open(args.output, 'w') as csv_file_object:
-        logging.info(f"Saving file {csv_file_object.name}")
-        writer = csv.DictWriter(csv_file_object, fieldnames = csv_rows[0].keys())
-        writer.writeheader()
-        writer.writerows(csv_rows)
+    if not csv_rows:
+        logging.warning("No valid data retrieved.")
+        return
+
+    writer = csv.DictWriter(sys.stdout, fieldnames = csv_rows[0].keys())
+    writer.writeheader()
+    writer.writerows(csv_rows)
 
 if __name__ == '__main__':
     main()
