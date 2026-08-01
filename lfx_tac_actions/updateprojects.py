@@ -11,25 +11,19 @@ import json
 import os
 import argparse
 import urllib.parse
-import logging
 from pathlib import Path
+import sys
+import logging
 
-from pathvalidate.argparse import validate_filepath_arg
+from . import setup_logging
 
 def main(args=None):
-    parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape into a CSV file.")
-    parser.add_argument("-o", "--output", help="filename to save output to",default='projects.csv',type=validate_filepath_arg)
+    parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape and streams in CSV format to stdout.")
     parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     parser.add_argument("--landscape_url", help="URL to the project's landscape",required=True)
     args = parser.parse_args(args)
 
-    numeric_level = getattr(logging, args.log_level.upper(), None)
-    if not isinstance(numeric_level, int):
-        raise ValueError(f'Invalid log level: {args.log_level}')
-    logging.basicConfig(level=numeric_level,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
-    if Path(args.output).suffix.lower() != '.csv':
-        logging.critical(f"Output filename {args.output} is invalid (must have extension '.csv')")
+    setup_logging(args.log_level)
 
     landscape_hosted_projects = urllib.parse.urljoin(args.landscape_url,'api/projects/all.json')
 
@@ -76,11 +70,13 @@ def main(args=None):
             'Contributed By': project.get('annotations',{}).get('contributed_by'),
             })
 
-    with open(args.output, 'w') as csv_file_object:
-        logging.info(f"Saving file {csv_file_object.name}")
-        writer = csv.DictWriter(csv_file_object, fieldnames = csv_rows[0].keys())
-        writer.writeheader()
-        writer.writerows(csv_rows)
+    if not csv_rows:
+        logging.warning("No valid data retrieved.")
+        return
+
+    writer = csv.DictWriter(sys.stdout, fieldnames = csv_rows[0].keys())
+    writer.writeheader()
+    writer.writerows(csv_rows)
 
 if __name__ == '__main__':
     main()

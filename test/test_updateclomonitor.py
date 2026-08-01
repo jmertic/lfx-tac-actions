@@ -10,17 +10,30 @@ import tempfile
 import os
 import responses
 import argparse
+import io
+import sys
+from unittest.mock import patch
 
 from lfx_tac_actions.updateclomonitor import main
 
 class TestUpdateCLOMonitor(unittest.TestCase):
 
     def testMainNoLandscapeUrl(self):
-        with tempfile.TemporaryDirectory() as tempdir:
-            tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.yaml')
-            main(["-o",tmpfilepath,"--landscape_url",""])
+        with self.assertLogs(level="ERROR") as cm:
+            main(["--landscape_url",""])
 
-        self.assertLogs("Error getting landscape_url api/projects/all.json - error message 'Invalid URL 'api/projects/all.json': No scheme supplied. Perhaps you meant https://api/projects/all.json?", level='CRITICAL')
+        self.assertTrue(
+            any(
+                "Invalid URL scheme: . Only HTTP and HTTPS are allowed" in output
+                for output in cm.output
+            )
+        )
+        self.assertTrue(
+            any(
+                "Execution aborted due to unsafe landscape_url." in output
+                for output in cm.output
+            )
+        )
 
     def testBadLogLevel(self):
         with self.assertRaises(ValueError) as cm:
@@ -97,13 +110,15 @@ class TestUpdateCLOMonitor(unittest.TestCase):
                 }
                 ]
             )
-        with tempfile.TemporaryDirectory() as tempdir:
-            tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.yaml')
-            main(["-o",tmpfilepath,"--landscape_url","https://landscape.aswf.io"])
+        captured_stdout = io.StringIO()
 
-            with open(tmpfilepath, 'r') as tmpfile:
-                self.maxDiff = None
-                self.assertEqual(tmpfile.read(),'''[]\n''')
+        with (self.assertLogs(level="WARNING") as cm, patch("sys.stdout", new=captured_stdout)):
+            main(["--landscape_url","https://landscape.aswf.io"])
+
+        self.assertIn("No valid data retrieved", str(cm.output[0]))
+
+        self.maxDiff = None
+        self.assertEqual(captured_stdout.getvalue().replace("\r\n", "\n"),'')
 
     @responses.activate
     def testMainInvalidArtworkUrl(self):
@@ -182,15 +197,15 @@ class TestUpdateCLOMonitor(unittest.TestCase):
                 }
                 ]
             )
-        with tempfile.TemporaryDirectory() as tempdir:
-            tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.yaml')
-            with self.assertLogs(level="ERROR") as cm:
-                main(["-o",tmpfilepath,"--landscape_url","https://landscape.aswf.io"])
-            self.assertIn("Error getting artwork repo file https://artwork.aswf.io/assets/data.json - error message '404 Client Error: Not Found for url: https://artwork.aswf.io/assets/data.json", str(cm.output[0]))
+        captured_stdout = io.StringIO()
 
-            with open(tmpfilepath, 'r') as tmpfile:
-                self.maxDiff = None
-                self.assertEqual(tmpfile.read(),'''- name: opencolorio
+        with (self.assertLogs(level="ERROR") as cm, patch("sys.stdout", new=captured_stdout)):
+            main(["--landscape_url","https://landscape.aswf.io"])
+
+        self.assertIn("Error getting artwork repo file https://artwork.aswf.io/assets/data.json - error message '404 Client Error: Not Found for url: https://artwork.aswf.io/assets/data.json", str(cm.output[0]))
+
+        self.maxDiff = None
+        self.assertEqual(captured_stdout.getvalue().replace("\r\n", "\n"),'''- name: opencolorio
   display_name: OpenColorIO
   description: The OpenColorIO project is committed to providing an industry standard
     solution for highly precise, performant, and consistent color management across
@@ -279,13 +294,13 @@ class TestUpdateCLOMonitor(unittest.TestCase):
                 }
                 ]
             )
-        with tempfile.TemporaryDirectory() as tempdir:
-            tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.yaml')
-            main(["-o",tmpfilepath,"--landscape_url","https://landscape.aswf.io"])
+        captured_stdout = io.StringIO()
 
-            with open(tmpfilepath, 'r') as tmpfile:
-                self.maxDiff = None
-                self.assertEqual(tmpfile.read(),'''- name: opencolorio
+        with patch("sys.stdout", new=captured_stdout):
+            main(["--landscape_url","https://landscape.aswf.io"])
+
+        self.maxDiff = None
+        self.assertEqual(captured_stdout.getvalue().replace("\r\n", "\n"),'''- name: opencolorio
   display_name: OpenColorIO
   description: The OpenColorIO project is committed to providing an industry standard
     solution for highly precise, performant, and consistent color management across
@@ -390,13 +405,13 @@ class TestUpdateCLOMonitor(unittest.TestCase):
                 }
                 ]
             )
-        with tempfile.TemporaryDirectory() as tempdir:
-            tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.yaml')
-            main(["-o",tmpfilepath,"--landscape_url","https://landscape.aswf.io"])
+        captured_stdout = io.StringIO()
 
-            with open(tmpfilepath, 'r') as tmpfile:
-                self.maxDiff = None
-                self.assertEqual(tmpfile.read(),'''- name: opencolorio
+        with patch("sys.stdout", new=captured_stdout):
+            main(["--landscape_url","https://landscape.aswf.io"])
+
+        self.maxDiff = None
+        self.assertEqual(captured_stdout.getvalue().replace("\r\n", "\n"),'''- name: opencolorio
   display_name: OpenColorIO
   description: The OpenColorIO project is committed to providing an industry standard
     solution for highly precise, performant, and consistent color management across

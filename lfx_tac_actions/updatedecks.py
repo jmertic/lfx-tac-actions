@@ -15,11 +15,7 @@ import logging
 from pathvalidate.argparse import validate_filepath_arg
 from pathvalidate import is_valid_filename
 
-def setup_logging(log_level):
-    numeric_level = getattr(logging, log_level.upper(), None)
-    if not isinstance(numeric_level, int):
-        raise ValueError(f'Invalid log level: {log_level}')
-    logging.basicConfig(level=numeric_level,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+from . import setup_logging
 
 def main(args=None):
     parser = argparse.ArgumentParser(description="Exports Google Slides and Powerpoint decks from Google Drive, saving them in PDF and PPTX format in a specified directory.")
@@ -44,7 +40,7 @@ def main(args=None):
                         if not is_valid_filename(document['filename']):
                             logging.critical(f"Security Error: {document['filename']} contains invalid characters")
                             return
-                        with open(Path(args.output,document['filename']).with_suffix(f".{export_format.lstrip('.')}"), 'wb') as f:
+                        with open((Path.cwd() / document['filename']).with_suffix(f".{export_format.lstrip('.')}"), 'wb') as f:
                             logging.info("Writing file {}".format(f.name))
                             f.write(response.content)
                 except Exception as e:
