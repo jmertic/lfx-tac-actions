@@ -89,7 +89,7 @@ def is_safe_url(url):
         return False
 
 def main(args=None):
-    parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape in YAML format to stdout that can imported into CLOMonitor.")
+    parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape in YAML format to `stdout` that can imported into CLOMonitor.")
     parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     parser.add_argument("--landscape_url", help="URL to the project's landscape",required=True)
     args = parser.parse_args(args)

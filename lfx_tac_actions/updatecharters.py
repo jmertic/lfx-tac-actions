@@ -18,7 +18,7 @@ from pathvalidate.argparse import validate_filename_arg, validate_filepath_arg
 from . import setup_logging
 
 def main(args=None):
-    parser = argparse.ArgumentParser(description="Downloads the Technical Charters for the subprojects of a project identified by --slug, saving them in a specified directory with naming format of `SLUG_charter`.")
+    parser = argparse.ArgumentParser(description="Downloads the Technical Charters for the subprojects of a project identified by `--slug`, saving them in the current working directory with naming format of `SLUG_charter`.")
     parser.add_argument("-s", "--slug", help="Umbrella Foundation slug", required=True)
     parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     args = parser.parse_args(args)
