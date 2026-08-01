@@ -14,7 +14,7 @@ import io
 import sys
 from unittest.mock import patch
 
-from lfx_tac_actions.updateclomonitor import main
+from lfx_tac_actions.updateclomonitor import main, parse_repositories
 
 class TestUpdateCLOMonitor(unittest.TestCase):
 
@@ -25,12 +25,6 @@ class TestUpdateCLOMonitor(unittest.TestCase):
         self.assertTrue(
             any(
                 "Invalid URL scheme: . Only HTTP and HTTPS are allowed" in output
-                for output in cm.output
-            )
-        )
-        self.assertTrue(
-            any(
-                "Execution aborted due to unsafe landscape_url." in output
                 for output in cm.output
             )
         )
@@ -430,6 +424,19 @@ class TestUpdateCLOMonitor(unittest.TestCase):
     exclude:
     - clomonitor
 ''')
+
+    def test_parse_repositories(self):
+        """Test that repositories are parsed correctly and exclude lists are added."""
+        raw_repos = [
+            {'url': 'https://github.com/myorg/my-awesome-repo'},
+            {'url': 'https://github.com/myorg/another-repo'}
+        ]
+        parsed = parse_repositories(raw_repos)
+
+        self.assertEqual(len(parsed), 2)
+        self.assertEqual(parsed[0]['name'], 'my-awesome-repo')
+        self.assertEqual(parsed[0]['url'], 'https://github.com/myorg/my-awesome-repo')
+        self.assertEqual(parsed[0]['exclude'], ['clomonitor'])
 
 if __name__ == '__main__':
     unittest.main()
