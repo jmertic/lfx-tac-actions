@@ -13,8 +13,6 @@ from pathlib import Path
 import logging
 import re
 
-from pathvalidate.argparse import validate_filename_arg, validate_filepath_arg
-
 from . import setup_logging
 
 def main(args=None):
