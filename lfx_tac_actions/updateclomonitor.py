@@ -15,8 +15,11 @@ import logging
 import ipaddress
 import socket
 from pathlib import Path
+import sys
 
 from pathvalidate.argparse import validate_filename_arg, validate_filepath_arg
+
+from . import setup_logging
 
 def load_from_artwork_repo(artwork_url):
     urlparts = urllib.parse.urlparse(artwork_url)
@@ -85,33 +88,21 @@ def is_safe_url(url):
         logging.exception(f"URL validation failed with error: {e}")
         return False
 
-def setup_logging(log_level):
-    numeric_level = getattr(logging, log_level.upper(), None)
-    if not isinstance(numeric_level, int):
-        raise ValueError(f'Invalid log level: {log_level}')
-    logging.basicConfig(level=numeric_level,format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-
 def main(args=None):
-    parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape into a file that can imported into CLOMonitor.")
-    parser.add_argument("-o", "--output", help="filename to save output to",default='clomonitor.yaml',type=validate_filepath_arg)
+    parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape in YAML format to `stdout` that can imported into CLOMonitor.")
     parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     parser.add_argument("--landscape_url", help="URL to the project's landscape",required=True)
     args = parser.parse_args(args)
 
     setup_logging(args.log_level)
 
-    if Path(args.output).suffix.lower() != '.yaml':
-        logging.critical(f"Output filename {args.output} is invalid (must have extension '.yaml')")
-        return
-
-    if not is_safe_url(args.landscape_url):
-        logging.critical("Execution aborted due to unsafe landscape_url.")
-        return
-
     project_entries = []
 
     try:
         landscape_hosted_projects = urllib.parse.urljoin(args.landscape_url,'api/projects/all.json')
+        if not is_safe_url(landscape_hosted_projects):
+            logging.critical("Execution aborted due to unsafe landscape_url.")
+            return
         hosted_projects_response = requests.get(landscape_hosted_projects)
         hosted_projects_response.raise_for_status()
         project_data = hosted_projects_response.json()
@@ -151,9 +142,11 @@ def main(args=None):
             logging.info(f"Adding {project.get('name')}")
             project_entries.append({k: v for k, v in project_entry.items() if v})
 
-    with open(args.output, 'w') as clomonitor_file_object:
-        logging.info(f"Saving file {clomonitor_file_object.name}")
-        yaml.dump(project_entries, clomonitor_file_object, sort_keys=False, indent=2)
+    if not project_entries:
+        logging.warning("No valid data retrieved.")
+        return
+
+    yaml.dump(project_entries, sys.stdout, sort_keys=False, indent=2)
 
 if __name__ == '__main__':
     main()

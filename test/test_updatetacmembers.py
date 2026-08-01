@@ -10,16 +10,25 @@ import tempfile
 import os
 import responses
 import argparse
+import io
+import sys
+from unittest.mock import patch
 
 from lfx_tac_actions.updatetacmembers import main
 
 class TestUpdateTACMembers(unittest.TestCase):
-    
+
     def testMainNoLFXTACCommitteeURL(self):
-        with tempfile.TemporaryDirectory() as tempdir:
-            tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
-            main(["-o",tmpfilepath,"--lfx_tac_committee_url",""])
-            self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
+        with self.assertLogs(level="CRITICAL") as log_context:
+            main(["--lfx_tac_committee_url", ""])
+
+        self.assertTrue(
+            any(
+                "Invalid value for lfx_tac_committee_url" in output
+                for output in log_context.output
+            ),
+            f"Expected log message not found in {log_context.output}",
+        )
 
     def testBadLogLevel(self):
         with self.assertRaises(ValueError) as cm:
@@ -34,9 +43,15 @@ class TestUpdateTACMembers(unittest.TestCase):
             ]
         for brokenurl in brokenurls:
             with tempfile.TemporaryDirectory() as tempdir:
-                tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
-                main(["-o",tmpfilepath,"--lfx_tac_committee_url",brokenurl])
-                self.assertFalse(os.path.exists(tmpfilepath), f"File '{tmpfilepath}' exists.")
+                with self.assertLogs(level="CRITICAL") as log_context:
+                    main(["--lfx_tac_committee_url",brokenurl])
+                self.assertTrue(
+                    any(
+                        "Invalid value for lfx_tac_committee_url" in output
+                        for output in log_context.output
+                    ),
+                    f"Expected log message not found in {log_context.output}",
+                )
 
     @responses.activate
     def testMainInvalidResponse(self):
@@ -46,15 +61,14 @@ class TestUpdateTACMembers(unittest.TestCase):
             status=404,
             body="Not here!"
             )
-        
+
         with tempfile.TemporaryDirectory() as tempdir:
             tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
             with self.assertLogs(level="CRITICAL") as cm:
-                main(["-o",tmpfilepath,"--lfx_tac_committee_url","https://projectadmin.lfx.linuxfoundation.org/project/a0941000002wBymAAE/collaboration/committees/163b26f7-a49b-40a3-89bb-e0592296c003"])
+                main(["--lfx_tac_committee_url","https://projectadmin.lfx.linuxfoundation.org/project/a0941000002wBymAAE/collaboration/committees/163b26f7-a49b-40a3-89bb-e0592296c003"])
 
-            self.assertFalse(os.path.isfile(tmpfilepath))
             self.assertIn("Error getting https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/a0941000002wBymAAE/committees/163b26f7-a49b-40a3-89bb-e0592296c003/members - 404 Client Error: Not Found for url: https://api-gw.platform.linuxfoundation.org/project-service/v2/public/projects/a0941000002wBymAAE/committees/163b26f7-a49b-40a3-89bb-e0592296c003/members", str(cm.output[0]))
-            
+
     @responses.activate
     def testMain(self):
         responses.add(
@@ -91,13 +105,13 @@ class TestUpdateTACMembers(unittest.TestCase):
                 ]
               }
             )
-        with tempfile.TemporaryDirectory() as tempdir:
-            tmpfilepath = os.path.join(tempdir, 'someFileInTmpDir.csv')
-            main(["-o",tmpfilepath,"--lfx_tac_committee_url","https://projectadmin.lfx.linuxfoundation.org/project/a0941000002wBymAAE/collaboration/committees/163b26f7-a49b-40a3-89bb-e0592296c003"])
+        captured_stdout = io.StringIO()
 
-            with open(tmpfilepath, 'r') as tmpfile:
-                self.maxDiff = None
-                self.assertEqual(tmpfile.read(),'''Full Name,Account Name: Account Name,Appointed By,Voting Status,Special Role,Title,HeadshotURL\nAndrea Orth,State Farm Mutual Automobile Insurance Company,Vote of TSC Committee,Voting Rep,None,Scrum Master,https://avatars0.githubusercontent.com/u/61636929?v=4\n''')
+        with patch("sys.stdout", new=captured_stdout):
+            main(["--lfx_tac_committee_url","https://projectadmin.lfx.linuxfoundation.org/project/a0941000002wBymAAE/collaboration/committees/163b26f7-a49b-40a3-89bb-e0592296c003"])
+
+        self.maxDiff = None
+        self.assertEqual(captured_stdout.getvalue().replace("\r\n", "\n"),'''Full Name,Account Name: Account Name,Appointed By,Voting Status,Special Role,Title,HeadshotURL\nAndrea Orth,State Farm Mutual Automobile Insurance Company,Vote of TSC Committee,Voting Rep,None,Scrum Master,https://avatars0.githubusercontent.com/u/61636929?v=4\n''')
 
 if __name__ == '__main__':
     unittest.main()

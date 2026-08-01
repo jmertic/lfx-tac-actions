@@ -11,11 +11,13 @@ import os
 import responses
 import argparse
 from pathlib import Path
+import io
+from unittest.mock import patch
 
 from lfx_tac_actions.updatecharters import main
 
 class TestUpdateCharters(unittest.TestCase):
-    
+
     def testMainNoSlug(self):
         with self.assertRaises(SystemExit) as cm:
             main(["-o",""])
@@ -34,7 +36,7 @@ class TestUpdateCharters(unittest.TestCase):
             status=404,
             body="Not here!"
             )
-        
+
         with self.assertLogs(level="CRITICAL") as cm:
             main(["--slug","lfenergy"])
         self.assertIn('Error getting charters at https://api-gw.platform.linuxfoundation.org/project-service/v1/public/projects?$filter=parentSlug%20eq%20lfenergy%20and%20status%20eq%20Active&pageSize=2000&orderBy=name', str(cm.output[0]))
@@ -99,9 +101,13 @@ class TestUpdateCharters(unittest.TestCase):
 
 
         with tempfile.TemporaryDirectory() as tempdir:
-            with self.assertLogs(level="ERROR") as cm:
-                main(["-o",tempdir,"--slug","lfenergy"])
-            
+            with (
+                patch.object(os, "chdir", os.chdir),
+                self.assertLogs(level="ERROR") as cm,
+            ):
+                os.chdir(tempdir)
+                main(["--slug","lfenergy"])
+
             self.assertTrue(os.path.isfile(Path(tempdir,"arras_charter.pdf")))
             self.assertFalse(os.path.isfile(Path(tempdir,"citrineos_charter.pdf")))
             self.assertFalse(os.path.isfile(Path(tempdir,"badproject_charter.pdf")))

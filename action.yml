@@ -86,35 +86,37 @@ runs:
     shell: bash
     if: inputs.updateprojects == 'true' && inputs.landscape_url != ''
     run: |
-      updateprojects -o _data/projects.csv --landscape_url ${{ inputs.landscape_url }}
+      updateprojects --landscape_url ${{ inputs.landscape_url }} -l INFO > _data/projects.csv
   - name: Run updatetacmembers
     shell: bash
     if: inputs.updatetacmembers == 'true' && inputs.lfx_tac_committee_url != ''
     run: |
-      updatetacmembers -o _data/tacmembers.csv --lfx_tac_committee_url ${{ inputs.lfx_tac_committee_url }}
+      updatetacmembers --lfx_tac_committee_url ${{ inputs.lfx_tac_committee_url }} -l INFO > _data/tacmembers.csv
   - name: Run updatetacagendaitems
     shell: bash
     if: inputs.updatetacagendaitems == 'true' && inputs.tac_agenda_gh_project_url != ''
     env:
       GH_TOKEN: ${{ env.token }}
     run: |
-      updatetacagendaitems -o _data/meeting-agenda-items.csv --tac_agenda_gh_project_url ${{ inputs.tac_agenda_gh_project_url }}
+      updatetacagendaitems --tac_agenda_gh_project_url ${{ inputs.tac_agenda_gh_project_url }} -l INFO > _data/meeting-agenda-items.csv
   - name: Run updateclomonitor
     shell: bash
     if: inputs.updateclomonitor == 'true' && inputs.landscape_url != ''
     run: |
-      updateclomonitor -o _data/meeting-agenda-items.csv --landscape_url ${{ inputs.landscape_url }}
+      updateclomonitor --landscape_url ${{ inputs.landscape_url }} -l INFO > _data/meeting-agenda-items.csv
   - name: Run updatecharters
     shell: bash
     if: inputs.updatecharters == 'true' && inputs.slug != ''
     run: |
+      mkdir -p project_charters
       find project_charters/ -maxdepth 1 -type f ! -name 'README.md' -delete
-      updatecharters -o ${{ inputs.updatecharters_output_dir }} --slug ${{ inputs.slug }} -l INFO
+      (cd project_charters && updatecharters --slug ${{ inputs.slug }} -l INFO)
   - name: Run updatedecks
     shell: bash
     if: inputs.updatedecks == 'true' && inputs.overview_decks != ''
     run: |
-      updatedecks -o overview_deck --overview_decks '${{ inputs.overview_decks }}'
+      mkdir -p overview_deck
+      (cd overview_deck && updatedecks --overview_decks '${{ inputs.overview_decks }}' -l INFO)
   - name: Get current date
     id: date
     uses: Kaven-Universe/github-action-current-date-time@7c1d8465d1bfd7d35466d2ee82a8e460780561ae # v1.5.0
