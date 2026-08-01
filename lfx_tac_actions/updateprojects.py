@@ -9,17 +9,15 @@ import csv
 import requests
 import json
 import os
-import argparse
 import urllib.parse
 import logging
 from pathlib import Path
 import sys
 
-from . import setup_logging, get_landscape_endpoint
+from . import setup_logging, setup_argparse, get_landscape_endpoint
 
 def main(args=None):
-    parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape and streams in CSV format to `stdout`.")
-    parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
+    parser = setup_argparse(description="Pulls hosted project data from a project's landscape and streams in CSV format to `stdout`.")
     parser.add_argument("--landscape_url", help="URL to the project's landscape",required=True)
     args = parser.parse_args(args)
 

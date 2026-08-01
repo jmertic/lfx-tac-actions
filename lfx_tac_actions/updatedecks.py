@@ -9,20 +9,15 @@ import requests
 import json
 import re
 from pathlib import Path
-import argparse
 import logging
-
-from pathvalidate.argparse import validate_filepath_arg
 from pathvalidate import is_valid_filename
 
-from . import setup_logging
+from . import setup_logging, setup_argparse
 
 def main(args=None):
-    parser = argparse.ArgumentParser(description="Exports Google Slides and Powerpoint decks from Google Drive, saving them in PDF and PPTX format in the current working directory.")
+    parser = setup_argparse(description="Exports Google Slides and Powerpoint decks from Google Drive, saving them in PDF and PPTX format in the current working directory.")
     parser.add_argument("--overview_decks", required=True, help="JSON array of Google Presentations to export ( format is '[{'url': GOOGLE-DRIVE-URL,'filename': EXPORT_FILENAME},...]' )")
-    parser.add_argument("-o", "--output", help="location to save output to",default='.',type=validate_filepath_arg)
     parser.add_argument("--export_formats", help="Comma delimited lists of export formats", default="pdf,pptx")
-    parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     args = parser.parse_args(args)
 
     setup_logging(args.log_level)
