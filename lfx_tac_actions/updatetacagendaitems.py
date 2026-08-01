@@ -12,8 +12,8 @@ import os
 import subprocess
 from urllib.parse import urlparse
 import argparse
-from pathlib import Path
 import logging
+from pathlib import Path
 
 from . import setup_logging
 

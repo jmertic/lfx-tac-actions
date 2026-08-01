@@ -10,11 +10,10 @@ import csv
 import requests
 import json
 import os
-import sys
-import logging
 from urllib.parse import urlparse
-from pathlib import Path
 import logging
+from pathlib import Path
+import sys
 
 from pathvalidate.argparse import validate_filepath_arg
 

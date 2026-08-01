@@ -11,10 +11,10 @@ import requests
 import urllib.parse
 import json
 import os
+import logging
 import ipaddress
 import socket
 from pathlib import Path
-import logging
 import sys
 
 from pathvalidate.argparse import validate_filename_arg, validate_filepath_arg

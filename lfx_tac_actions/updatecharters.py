@@ -10,8 +10,8 @@ import os
 from urllib.parse import urlparse, quote
 import argparse
 from pathlib import Path
-import re
 import logging
+import re
 
 from pathvalidate.argparse import validate_filename_arg, validate_filepath_arg
 

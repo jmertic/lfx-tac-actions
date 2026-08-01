@@ -11,9 +11,9 @@ import json
 import os
 import argparse
 import urllib.parse
+import logging
 from pathlib import Path
 import sys
-import logging
 
 from . import setup_logging
 
