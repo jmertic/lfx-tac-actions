@@ -6,7 +6,6 @@
 # encoding=utf8
 
 import yaml
-import argparse
 import requests
 import urllib.parse
 import json
@@ -17,9 +16,7 @@ import socket
 from pathlib import Path
 import sys
 
-from pathvalidate.argparse import validate_filename_arg, validate_filepath_arg
-
-from . import setup_logging
+from . import setup_logging, setup_argparse, get_landscape_endpoint
 
 def load_from_artwork_repo(artwork_url):
     urlparts = urllib.parse.urlparse(artwork_url)
@@ -51,46 +48,8 @@ def parse_repositories(repos):
 
     return returnrepos
 
-def is_safe_url(url):
-    """
-    Validates the URL to prevent SSRF by ensuring it uses HTTP/HTTPS
-    and does not resolve to local, loopback, or private IP addresses.
-    """
-    try:
-        parsed_url = urllib.parse.urlparse(url)
-
-        # 1. Enforce HTTP/HTTPS protocol
-        if parsed_url.scheme not in ('http', 'https'):
-            logging.error(f"Invalid URL scheme: {parsed_url.scheme}. Only HTTP and HTTPS are allowed.")
-            return False
-
-        # 2. Enforce presence of a hostname
-        hostname = parsed_url.hostname
-        if not hostname:
-            logging.error("URL is missing a valid hostname.")
-            return False
-
-        # 3. Resolve hostname to an IP address and check if it's private/loopback
-        # Note: If your environment relies on a local proxy, you may need to adjust this.
-        try:
-            ip_address_str = socket.gethostbyname(hostname)
-            ip_obj = ipaddress.ip_address(ip_address_str)
-
-            if ip_obj.is_private or ip_obj.is_loopback:
-                logging.error(f"URL resolves to a restricted local/private IP address: {ip_address_str}")
-                return False
-        except socket.gaierror:
-            logging.error(f"Could not resolve hostname: {hostname}")
-            return False
-
-        return True
-    except Exception as e:
-        logging.exception(f"URL validation failed with error: {e}")
-        return False
-
 def main(args=None):
-    parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape in YAML format to `stdout` that can imported into CLOMonitor.")
-    parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
+    parser = setup_argparse(description="Pulls hosted project data from a project's landscape in YAML format to `stdout` that can imported into CLOMonitor.")
     parser.add_argument("--landscape_url", help="URL to the project's landscape",required=True)
     args = parser.parse_args(args)
 
@@ -99,15 +58,12 @@ def main(args=None):
     project_entries = []
 
     try:
-        landscape_hosted_projects = urllib.parse.urljoin(args.landscape_url,'api/projects/all.json')
-        if not is_safe_url(landscape_hosted_projects):
-            logging.critical("Execution aborted due to unsafe landscape_url.")
-            return
+        landscape_hosted_projects = get_landscape_endpoint(args.landscape_url)
         hosted_projects_response = requests.get(landscape_hosted_projects)
         hosted_projects_response.raise_for_status()
         project_data = hosted_projects_response.json()
     except Exception as e:
-        logging.critical(f"Error getting landscape_url {landscape_hosted_projects} - error message '{e}'")
+        logging.critical(f"Error getting landscape_url {args.landscape_url} - error message '{e}'")
         return
 
     for project in project_data:

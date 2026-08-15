@@ -1,7 +1,9 @@
 # LFX Actions
 
 [![License](https://img.shields.io/github/license/jmertic/lfx-tac-actions)](LICENSE)
+[![CI](https://github.com/jmertic/lfx-tac-actions/workflows/CI/badge.svg)](https://github.com/jmertic/lfx-tac-actions/actions?query=workflow%3ACI+branch%3Amain)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=jmertic_lfx-tac-actions&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=jmertic_lfx-tac-actions)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=jmertic_lfx-tac-actions&metric=coverage)](https://sonarcloud.io/summary/new_code?id=jmertic_lfx-tac-actions)
 
 LFX Actions are a series of tools that can be either ran directly at the CLI or leveraged via GitHub Actions, which automate pulling data from LFX for using with other tools and services. The current list of tools provided is as below:
 
@@ -34,7 +36,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: jmertic/lfx-tac-actions@39633d84d61a95ed47e84827fdc0c3fb7cf869e0 # 20260612
+      - uses: jmertic/lfx-tac-actions@6c227fe42b9769a6d1b4460f2e077e35c62bc3a0 # 20260801
         with:
           # refer to https://github.com/jmertic/lfx-tac-actions/blob/main/action.yml#L3 for the various inputs to set. 
         env:

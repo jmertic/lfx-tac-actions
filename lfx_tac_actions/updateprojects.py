@@ -9,31 +9,29 @@ import csv
 import requests
 import json
 import os
-import argparse
 import urllib.parse
 import logging
 from pathlib import Path
 import sys
 
-from . import setup_logging
+from . import setup_logging, setup_argparse, get_landscape_endpoint
 
 def main(args=None):
-    parser = argparse.ArgumentParser(description="Pulls hosted project data from a project's landscape and streams in CSV format to `stdout`.")
-    parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
+    parser = setup_argparse(description="Pulls hosted project data from a project's landscape and streams in CSV format to `stdout`.")
     parser.add_argument("--landscape_url", help="URL to the project's landscape",required=True)
     args = parser.parse_args(args)
 
     setup_logging(args.log_level)
 
-    landscape_hosted_projects = urllib.parse.urljoin(args.landscape_url,'api/projects/all.json')
-
     csv_rows = []
+
     try:
+        landscape_hosted_projects = get_landscape_endpoint(args.landscape_url)
         hosted_projects_response = requests.get(landscape_hosted_projects)
         hosted_projects_response.raise_for_status()
         project_data = hosted_projects_response.json()
     except Exception as e:
-        logging.critical(f"Error getting landscape_url {landscape_hosted_projects} - '{e}'")
+        logging.critical(f"Error getting landscape_url {args.landscape_url} - '{e}'")
         return
 
     for project in project_data:

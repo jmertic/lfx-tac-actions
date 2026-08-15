@@ -5,7 +5,6 @@
 #
 # encoding=utf8
 
-import argparse
 import csv
 import requests
 import json
@@ -16,13 +15,10 @@ from pathlib import Path
 import re
 import sys
 
-from pathvalidate.argparse import validate_filepath_arg
-
-from . import setup_logging
+from . import setup_logging, setup_argparse
 
 def main(args=None):
-    parser = argparse.ArgumentParser(description="Pulls the current list of TAC members from LFX PCC and streams CSV format to `stdout`.")
-    parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
+    parser = setup_argparse(description="Pulls the current list of TAC members from LFX PCC and streams CSV format to `stdout`.")
     parser.add_argument("--lfx_tac_committee_url", help="URL to the TAC Committee in LFX PCC", required=True)
     args = parser.parse_args(args)
 

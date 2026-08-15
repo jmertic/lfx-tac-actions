@@ -8,17 +8,15 @@
 import requests
 import os
 from urllib.parse import urlparse, quote
-import argparse
 from pathlib import Path
 import logging
 import re
 
-from . import setup_logging
+from . import setup_logging, setup_argparse
 
 def main(args=None):
-    parser = argparse.ArgumentParser(description="Downloads the Technical Charters for the subprojects of a project identified by `--slug`, saving them in the current working directory with naming format of `SLUG_charter`.")
+    parser = setup_argparse(description="Downloads the Technical Charters for the subprojects of a project identified by `--slug`, saving them in the current working directory with naming format of `SLUG_charter`.")
     parser.add_argument("-s", "--slug", help="Umbrella Foundation slug", required=True)
-    parser.add_argument('--log-level','-l',default='WARNING',help='Provide logging level. Example: --log-level DEBUG, default: WARNING')
     args = parser.parse_args(args)
 
     setup_logging(args.log_level)
