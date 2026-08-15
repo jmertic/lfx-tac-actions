@@ -21,6 +21,10 @@ inputs:
     description: "JSON array of Google Presentations to export ( format is '[{'url': GOOGLE-DRIVE-URL,'filename': EXPORT_FILENAME},...]' )"
     required: false
     default: ""
+  updatecharters_output_dir:
+    description: "File location for saving charter from the `updatecharters` action"
+    required: false
+    default: "overview_deck"
   updateprojects:
     description: "Run updateprojects"
     required: false
@@ -109,6 +113,7 @@ runs:
     if: inputs.updatecharters == 'true' && inputs.slug != ''
     run: |
       mkdir -p project_charters
+      find project_charters/ -maxdepth 1 -type f ! -name 'README.md' -delete
       (cd project_charters && updatecharters --slug ${{ inputs.slug }} -l INFO)
   - name: Run updatedecks
     shell: bash
