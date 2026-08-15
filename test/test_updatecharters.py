@@ -13,14 +13,16 @@ import argparse
 from pathlib import Path
 import io
 from unittest.mock import patch
+from contextlib import redirect_stderr
 
 from lfx_tac_actions.updatecharters import main
 
 class TestUpdateCharters(unittest.TestCase):
 
     def testMainNoSlug(self):
-        with self.assertRaises(SystemExit) as cm:
-            main(["-o",""])
+        with redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit) as cm:
+                main(["-o", ""])
         self.assertEqual(cm.exception.code, 2)
 
     def testBadLogLevel(self):

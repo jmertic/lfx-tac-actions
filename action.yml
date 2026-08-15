@@ -45,13 +45,17 @@ inputs:
     description: "Run updatedecks"
     required: false
     default: 'false'
+  updateartwork:
+    description: "Run updateartwork"
+    required: false
+    default: 'false'
 runs:
   using: composite
   steps:
-  - name: Harden Runner
-    uses: step-security/harden-runner@b09bb98e06d4d774595224525879c09bc6e98c40 # v2.20.1
+  - name: Install cairo
+    uses: gerlero/apt-install@c0fa73fe5c4a22deecf6d629565be92a15dd2026 # v1.3.12
     with:
-      egress-policy: audit
+      packages: libcairo2-dev pkg-config python3-dev
   - name: Check out repo
     uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     with:
@@ -112,6 +116,11 @@ runs:
     run: |
       mkdir -p overview_deck
       (cd overview_deck && updatedecks --overview_decks '${{ inputs.overview_decks }}' -l INFO)
+  - name: Run updateartwork
+    shell: bash
+    if: inputs.updateartwork == 'true' && inputs.slug != ''
+    run: |
+      updateartwork --slug ${{ inputs.slug }} -l INFO
   - name: Get current date
     id: date
     uses: Kaven-Universe/github-action-current-date-time@7c1d8465d1bfd7d35466d2ee82a8e460780561ae # v1.5.0

@@ -13,6 +13,7 @@ LFX Actions are a series of tools that can be either ran directly at the CLI or 
 - `updateclomonitor`: Pulls hosted project data from a project's landscape in YAML format to `stdout` that can imported into [CLOMonitor](https://github.com/cncf/clomonitor).
 - `updatecharters`: Downloads the Technical Charters for the subprojects of a project identified by `--slug`, saving them in the current working directory with naming format of `SLUG_charter`.
 - `updatedecks`: Exports Google Slides and Powerpoint decks from Google Drive, saving them in PDF and PPTX format in the current working directory.
+- `updateartwork`: Downloads the logo for the subprojects of a project identified by `--slug`, saving them in the current working directory with naming format of `SLUG/primary/color/SLUG-primary-color.svg` and updating the `SLUG/README.md` as appropriate.
 
 You can run any of these commands with the `-h` flag to see the command line arguments required.
 
