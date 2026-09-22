@@ -177,7 +177,7 @@ jobs:
             --auto \
             "${{ github.event.pull_request.number }}"
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
 ```
 
 ##### Personal Access Token (PAT) or `GITHUB_TOKEN` token version
