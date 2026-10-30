@@ -76,6 +76,35 @@ def create_github_issue(token: str, repo: str, title: str, body: str) -> None:
         error_body = e.read().decode("utf-8")
         logger.exception("Failed to create issue in %s: %d - %s", repo, e.code, error_body)
 
+def _extract_field_text(item: dict, field_name: str) -> str | None:
+    """Extracts text content for a specific ProjectV2 field."""
+    for val in item.get("fieldValues", {}).get("nodes", []):
+        if val.get("field", {}).get("name") == field_name:
+            return val.get("text")
+    return None
+
+
+def _audit_single_item(item: dict) -> dict | None:
+    """Audits an individual project item and returns missing record dict if invalid."""
+    content = item.get("content") or {}
+    labels_data = content.get("labels", {}).get("nodes", [])
+    label_names = [label.get("name", "") for label in labels_data]
+
+    if not any(TARGET_LABEL_SUBSTRING in name for name in label_names):
+        return None
+
+    title = content.get("title", "Untitled Project")
+    url = content.get("url", "")
+    logger.info(f"Checking {title}")
+
+    committee_url = _extract_field_text(item, TARGET_FIELD_NAME)
+    if not committee_url or not committee_url.strip():
+        logger.warning("Project '%s' is missing '%s'", title, TARGET_FIELD_NAME)
+        return {"title": title, "url": url}
+
+    logger.info(f"{TARGET_FIELD_NAME} set to {committee_url}")
+    return None
+
 
 def audit_project(org: str, project_number: int, token: str) -> list:
     query = """
@@ -140,43 +169,22 @@ def audit_project(org: str, project_number: int, token: str) -> list:
         project = data.get("organization", {}).get("projectV2")
 
         if not project:
-            logger.error("Project #%d under organization '%s' not found or inaccessible.", project_number, org)
+            logger.error(
+                "Project #%d under organization '%s' not found or inaccessible.",
+                project_number,
+                org,
+            )
             sys.exit(1)
 
         items_data = project["items"]
         for item in items_data["nodes"]:
-            content = item.get("content") or {}
-            labels_data = content.get("labels", {}).get("nodes", [])
-            label_names = [label.get("name", "") for label in labels_data]
-            title = content.get("title", "Untitled Project")
-            url = content.get("url", "")
+            missing_item = _audit_single_item(item)
+            if missing_item:
+                all_missing.append(missing_item)
 
-
-            # Check if any label contains the target substring
-            has_target_label = any(TARGET_LABEL_SUBSTRING in name for name in label_names)
-            if not has_target_label:
-                continue
-            logger.info(f"Checking {title}")
-
-            # Extract the committee URL field
-            values = item.get("fieldValues", {}).get("nodes", [])
-            committee_url = None
-            for val in values:
-                field_name = val.get("field", {}).get("name")
-                if field_name == TARGET_FIELD_NAME:
-                    committee_url = val.get("text")
-                    break
-
-            if not committee_url or not committee_url.strip():
-                logger.warning("Project '%s' is missing '%s'", title, TARGET_FIELD_NAME)
-                all_missing.append({"title": title, "url": url})
-            else:
-                logger.info(f"{TARGET_FIELD_NAME} set to {committee_url}")
-
-        if items_data["pageInfo"]["hasNextPage"]:
-            cursor = items_data["pageInfo"]["endCursor"]
-        else:
+        if not items_data["pageInfo"]["hasNextPage"]:
             break
+        cursor = items_data["pageInfo"]["endCursor"]
 
     return all_missing
 
