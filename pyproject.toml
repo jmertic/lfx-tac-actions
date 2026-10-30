@@ -26,6 +26,7 @@ updatetacagendaitems = "lfx_tac_actions.updatetacagendaitems:main"
 updatedecks = "lfx_tac_actions.updatedecks:main"
 updatecharters = "lfx_tac_actions.updatecharters:main"
 updateartwork = "lfx_tac_actions.updateartwork:main"
+checkcommitteeurls = "lfx_tac_actions.checkcommitteeurls:main"
 
 [build-system]
 requires = ["poetry-core"]

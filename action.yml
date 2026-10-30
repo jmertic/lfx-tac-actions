@@ -17,6 +17,10 @@ inputs:
     description: "URL for the GitHub Project in the TAC repo for managing TAC meeting agendas"
     required: false
     default: ""
+  tac_gh_repo_url:
+    description: "URL for the TAC repo"
+    required: false
+    default: ""
   overview_decks:
     description: "JSON array of Google Presentations to export ( format is '[{'url': GOOGLE-DRIVE-URL,'filename': EXPORT_FILENAME},...]' )"
     required: false
@@ -51,6 +55,10 @@ inputs:
     default: 'false'
   updateartwork:
     description: "Run updateartwork"
+    required: false
+    default: 'false'
+  checkcommitteeurls:
+    description: "Run checkcommitteeurls"
     required: false
     default: 'false'
 runs:
@@ -126,6 +134,20 @@ runs:
     if: inputs.updateartwork == 'true' && inputs.slug != ''
     run: |
       updateartwork --slug ${{ inputs.slug }} -l INFO
+  - name: Run checkcommitteeurls
+    if: inputs.checkcommitteeurls == 'true'
+    shell: bash
+    env:
+      GITHUB_TOKEN: ${{ env.token }}
+    run: |
+      EXTRA_FLAGS=""
+      if [ -n "${{ inputs.tac_gh_repo_url }}" ]; then
+        EXTRA_FLAGS="--create-issue-in ${{ inputs.tac_gh_repo_url }}"
+      fi
+      lfx-tac-check-urls \
+          --project-url "${{ inputs.tac_agenda_gh_project_url }}" \
+          --token "${{ inputs.github_token }}"
+          $EXTRA_FLAGS
   - name: Get current date
     id: date
     uses: Kaven-Universe/github-action-current-date-time@7c1d8465d1bfd7d35466d2ee82a8e460780561ae # v1.5.0
