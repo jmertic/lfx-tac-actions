@@ -112,12 +112,12 @@ jobs:
 
       - name: Enable Pull Request Automerge
         if: steps.cpr.outputs.pull-request-number != ''
-        shell: bash
-        run: |
-          ALLOW_MERGE=\((gh api "repos/\)GITHUB_REPOSITORY" --jq '.allow_auto_merge')
-
-          if [ "$ALLOW_MERGE" = "true" ]; then
-            gh pr merge --squash --auto "\({{ steps.cpr.outputs.pull-request-number }}" || gh pr merge --squash "\){{ steps.cpr.outputs.pull-request-number }}"
-          fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.cpr.outputs.pull-request-number }}
+        run: |
+          ALLOW_MERGE=$(gh api "repos/${GITHUB_REPOSITORY}" --jq '.allow_auto_merge')
+
+          if [ "$ALLOW_MERGE" = "true" ]; then
+            gh pr merge --squash --auto "$PR_NUMBER" || gh pr merge --squash "$PR_NUMBER"
+          fi
