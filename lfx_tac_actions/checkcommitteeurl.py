@@ -54,7 +54,7 @@ def run_graphql_query(token: str, query: str, variables: dict = None) -> dict:
             return data["data"]
     except urllib.error.HTTPError as e:
         error_body = e.read().decode("utf-8")
-        logger.error("HTTP error %d querying GraphQL API: %s", e.code, error_body)
+        logger.exception("HTTP error %d querying GraphQL API: %s", e.code, error_body)
         sys.exit(1)
 
 
@@ -74,7 +74,7 @@ def create_github_issue(token: str, repo: str, title: str, body: str) -> None:
             logger.info("Audit issue created successfully: %s", data.get("html_url"))
     except urllib.error.HTTPError as e:
         error_body = e.read().decode("utf-8")
-        logger.error("Failed to create issue in %s: %d - %s", repo, e.code, error_body)
+        logger.exception("Failed to create issue in %s: %d - %s", repo, e.code, error_body)
 
 
 def audit_project(org: str, project_number: int, token: str) -> list:
@@ -206,7 +206,7 @@ def main() -> int:
     try:
         org, project_number = parse_project_url(getattr(args, "project_url", None))
     except ValueError as e:
-        logger.error(str(e))
+        logger.exception(str(e))
         return 1
 
     logger.info("Auditing organization '%s', Project #%d...", org, project_number)
