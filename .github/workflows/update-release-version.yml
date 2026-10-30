@@ -25,18 +25,18 @@ jobs:
       - name: Get Release Metadata
         id: meta
         run: |
-          RAW_TAG="20261030"
+          RAW_TAG="${{ github.event.release.tag_name }}"
           VERSION="${RAW_TAG#v}"
-          
+
           # Dereference the tag to retrieve the underlying 40-character commit SHA
           SHA=$(git rev-parse "${RAW_TAG}^{commit}")
-          
-          # Append to GitHub Actions output file
+
+          # Set step outputs
           echo "RAW_TAG=${RAW_TAG}" >> "$GITHUB_OUTPUT"
           echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "SHA=${SHA}" >> "$GITHUB_OUTPUT"
-          
-          # Debugging log output
+
+          # Debug logging
           echo "Processing Tag: ${RAW_TAG}, Version: ${VERSION}, SHA: ${SHA}"
 
       - name: Update pyproject.toml
