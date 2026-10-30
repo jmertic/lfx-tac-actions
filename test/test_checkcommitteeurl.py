@@ -131,35 +131,44 @@ class TestAuditProject(unittest.TestCase):
                     "items": {
                         "pageInfo": {"hasNextPage": False, "endCursor": None},
                         "nodes": [
-                            # Item 1: Approved, missing TARGET_FIELD_NAME
+                            # Item 1: Has label, missing committee URL -> FLAGGED
                             {
                                 "fieldValues": {
                                     "nodes": [
-                                        {"field": {"name": "Status"}, "name": "Approved"},
-                                        {"field": {"name": TARGET_FIELD_NAME}, "text": ""},
+                                        {"field": {"name": TARGET_FIELD_NAME}, "text": ""}
                                     ]
                                 },
-                                "content": {"title": "Missing URL Project", "url": "https://github.com/org/repo/issues/1"},
+                                "content": {
+                                    "title": "Missing URL Project",
+                                    "url": "https://github.com/org/repo/issues/1",
+                                    "labels": {"nodes": [{"name": "2-annual-review"}]},
+                                },
                             },
-                            # Item 2: Approved, has TARGET_FIELD_NAME
+                            # Item 2: Has label, has committee URL -> OK
                             {
                                 "fieldValues": {
                                     "nodes": [
-                                        {"field": {"name": "Status"}, "name": "Approved"},
-                                        {"field": {"name": TARGET_FIELD_NAME}, "text": "https://tsc.example.org"},
+                                        {"field": {"name": TARGET_FIELD_NAME}, "text": "https://tsc.example.org"}
                                     ]
                                 },
-                                "content": {"title": "Valid Project", "url": "https://github.com/org/repo/issues/2"},
+                                "content": {
+                                    "title": "Valid Project",
+                                    "url": "https://github.com/org/repo/issues/2",
+                                    "labels": {"nodes": [{"name": "stage: 2-annual-review"}]},
+                                },
                             },
-                            # Item 3: Not Approved, missing URL (should be ignored)
+                            # Item 3: Missing target label -> IGNORED
                             {
                                 "fieldValues": {
                                     "nodes": [
-                                        {"field": {"name": "Status"}, "name": "Under Review"},
-                                        {"field": {"name": TARGET_FIELD_NAME}, "text": ""},
+                                        {"field": {"name": TARGET_FIELD_NAME}, "text": ""}
                                     ]
                                 },
-                                "content": {"title": "Under Review Project", "url": "https://github.com/org/repo/issues/3"},
+                                "content": {
+                                    "title": "Other Project",
+                                    "url": "https://github.com/org/repo/issues/3",
+                                    "labels": {"nodes": [{"name": "bug"}]},
+                                },
                             },
                         ],
                     }
@@ -174,7 +183,6 @@ class TestAuditProject(unittest.TestCase):
 
     @patch("lfx_tac_actions.checkcommitteeurl.run_graphql_query")
     def test_audit_project_pagination(self, mock_query):
-        # Page 1: hasNextPage True
         page1 = {
             "organization": {
                 "projectV2": {
@@ -183,16 +191,19 @@ class TestAuditProject(unittest.TestCase):
                         "nodes": [
                             {
                                 "fieldValues": {
-                                    "nodes": [{"field": {"name": "Status"}, "name": "Approved"}]
+                                    "nodes": [{"field": {"name": TARGET_FIELD_NAME}, "text": ""}]
                                 },
-                                "content": {"title": "Project Page 1", "url": "https://github.com/org/repo/issues/1"},
+                                "content": {
+                                    "title": "Project Page 1",
+                                    "url": "https://github.com/org/repo/issues/1",
+                                    "labels": {"nodes": [{"name": "2-annual-review"}]},
+                                },
                             }
                         ],
                     }
                 }
             }
         }
-        # Page 2: hasNextPage False
         page2 = {
             "organization": {
                 "projectV2": {
@@ -202,11 +213,14 @@ class TestAuditProject(unittest.TestCase):
                             {
                                 "fieldValues": {
                                     "nodes": [
-                                        {"field": {"name": "Status"}, "name": "Approved"},
-                                        {"field": {"name": TARGET_FIELD_NAME}, "text": "https://valid.org"},
+                                        {"field": {"name": TARGET_FIELD_NAME}, "text": "https://valid.org"}
                                     ]
                                 },
-                                "content": {"title": "Project Page 2", "url": "https://github.com/org/repo/issues/2"},
+                                "content": {
+                                    "title": "Project Page 2",
+                                    "url": "https://github.com/org/repo/issues/2",
+                                    "labels": {"nodes": [{"name": "2-annual-review"}]},
+                                },
                             }
                         ],
                     }
@@ -304,7 +318,7 @@ class TestMain(unittest.TestCase):
         call_args = mock_create_issue.call_args[0]
         self.assertEqual(call_args[0], "valid-token")
         self.assertEqual(call_args[1], "hyperledger/tac")
-        self.assertIn("Missing Committee URLs", call_args[2])
+        self.assertIn("Missing PCC TSC Committee URL", call_args[2])
         self.assertIn("Test Project", call_args[3])
 
         # Verify Step Summary written
@@ -314,6 +328,48 @@ class TestMain(unittest.TestCase):
         self.assertIn("Test Project", summary_content)
         self.assertIn(TARGET_FIELD_NAME, summary_content)
 
+    @patch.dict(os.environ, {"GITHUB_TOKEN": "valid-token"})
+    @patch("lfx_tac_actions.checkcommitteeurl.audit_project")
+    def test_main_prints_to_stdout_when_create_issue_not_set(self, mock_audit):
+        mock_audit.return_value = [
+            {"title": "CLI Output Project", "url": "https://github.com/org/repo/issues/10"}
+        ]
+        test_args = [
+            "prog",
+            "--project-url",
+            "https://github.com/orgs/hyperledger/projects/19",
+        ]
+
+        with patch.object(sys, "argv", test_args), patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            exit_code = main()
+
+        self.assertEqual(exit_code, 0)
+        output = mock_stdout.getvalue()
+        self.assertIn("Approved Projects Missing PCC TSC Committee URL", output)
+        self.assertIn("CLI Output Project", output)
+
+    @patch.dict(os.environ, {"GITHUB_TOKEN": "valid-token"})
+    @patch("lfx_tac_actions.checkcommitteeurl.create_github_issue")
+    @patch("lfx_tac_actions.checkcommitteeurl.audit_project")
+    def test_main_creates_issue_when_create_issue_set(self, mock_audit, mock_create_issue):
+        mock_audit.return_value = [
+            {"title": "Issue Project", "url": "https://github.com/org/repo/issues/20"}
+        ]
+        test_args = [
+            "prog",
+            "--project-url",
+            "https://github.com/orgs/hyperledger/projects/19",
+            "--create-issue-in",
+            "hyperledger/tac",
+        ]
+
+        with patch.object(sys, "argv", test_args), patch("sys.stdout", new_callable=io.StringIO) as mock_stdout:
+            exit_code = main()
+
+        self.assertEqual(exit_code, 0)
+        mock_create_issue.assert_called_once()
+        # Verify the report wasn't also dumped to stdout
+        self.assertNotIn("### ⚠️ Approved Projects Missing", mock_stdout.getvalue())
 
 if __name__ == "__main__":
     unittest.main()

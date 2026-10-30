@@ -14,6 +14,9 @@ import urllib.error
 import urllib.request
 from datetime import datetime, timezone
 
+from rich.console import Console
+from rich.markdown import Markdown
+
 from . import setup_argparse, setup_logging
 
 logger = logging.getLogger(__name__)
@@ -21,6 +24,7 @@ logger = logging.getLogger(__name__)
 GRAPHQL_URL = "https://api.github.com/graphql"
 REST_API_BASE = "https://api.github.com"
 TARGET_FIELD_NAME = "PCC TSC Committee URL"
+TARGET_LABEL_SUBSTRING = "2-annual-review"
 
 def parse_project_url(project_url: str) -> tuple[str, int]:
     """Extracts organization login and project number from a GitHub project URL."""
@@ -98,9 +102,27 @@ def audit_project(org: str, project_number: int, token: str) -> list:
                 }
               }
               content {
-                ... on Issue { title url }
-                ... on PullRequest { title url }
-                ... on DraftIssue { title }
+                ... on Issue {
+                  title
+                  url
+                  labels(first: 20) {
+                    nodes {
+                      name
+                    }
+                  }
+                }
+                ... on PullRequest {
+                  title
+                  url
+                  labels(first: 20) {
+                    nodes {
+                      name
+                    }
+                  }
+                }
+                ... on DraftIssue {
+                  title
+                }
               }
             }
           }
@@ -123,28 +145,33 @@ def audit_project(org: str, project_number: int, token: str) -> list:
 
         items_data = project["items"]
         for item in items_data["nodes"]:
-            values = item.get("fieldValues", {}).get("nodes", [])
-            status = None
-            committee_url = None
-
-            for val in values:
-                field_name = val.get("field", {}).get("name")
-                if field_name == "Status":
-                    status = val.get("name")
-                elif field_name == TARGET_FIELD_NAME:
-                    committee_url = val.get("text")
-
-            # Only check items where Status == "Approved"
-            if status != "Approved":
-                continue
-
             content = item.get("content") or {}
+            labels_data = content.get("labels", {}).get("nodes", [])
+            label_names = [label.get("name", "") for label in labels_data]
             title = content.get("title", "Untitled Project")
             url = content.get("url", "")
+
+
+            # Check if any label contains the target substring
+            has_target_label = any(TARGET_LABEL_SUBSTRING in name for name in label_names)
+            if not has_target_label:
+                continue
+            logger.info(f"Checking {title}")
+
+            # Extract the committee URL field
+            values = item.get("fieldValues", {}).get("nodes", [])
+            committee_url = None
+            for val in values:
+                field_name = val.get("field", {}).get("name")
+                if field_name == TARGET_FIELD_NAME:
+                    committee_url = val.get("text")
+                    break
 
             if not committee_url or not committee_url.strip():
                 logger.warning("Project '%s' is missing '%s'", title, TARGET_FIELD_NAME)
                 all_missing.append({"title": title, "url": url})
+            else:
+                logger.info(f"{TARGET_FIELD_NAME} set to {committee_url}")
 
         if items_data["pageInfo"]["hasNextPage"]:
             cursor = items_data["pageInfo"]["endCursor"]
@@ -186,7 +213,7 @@ def main() -> int:
     missing_records = audit_project(org, project_number, token)
 
     if not missing_records:
-        logger.info("Audit clean: All approved projects have PCC, LFX, and TSC committee URLs configured.")
+        logger.info(f"Audit clean: All approved projects have `{TARGET_FIELD_NAME}` set correctly.")
         return 0
 
     logger.warning("Audit completed: Found %d approved project(s) with missing URLs.", len(missing_records))
@@ -208,12 +235,15 @@ def main() -> int:
 
     create_issue_in = getattr(args, "create_issue_in", None)
     if create_issue_in:
-        issue_title = f"[Audit] Missing Committee URLs for {org} Board #{project_number} ({today_str})"
+        issue_title = f"[Audit] Missing {TARGET_FIELD_NAME} for {org} Board #{project_number} ({today_str})"
         logger.info("Creating tracking issue in '%s'...", create_issue_in)
         create_github_issue(token, create_issue_in, issue_title, report_md)
+    else:
+        console = Console()
+        console.print()
+        console.print(Markdown(report_md))
 
     return 0
-
 
 if __name__ == "__main__":
     sys.exit(main())
