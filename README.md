@@ -14,6 +14,7 @@ LFX Actions are a series of tools that can be either ran directly at the CLI or 
 - `updatecharters`: Downloads the Technical Charters for the subprojects of a project identified by `--slug`, saving them in the current working directory with naming format of `SLUG_charter`.
 - `updatedecks`: Exports Google Slides and Powerpoint decks from Google Drive, saving them in PDF and PPTX format in the current working directory.
 - `updateartwork`: Downloads the logo for the subprojects of a project identified by `--slug`, saving them in the current working directory with naming format of `SLUG/primary/color/SLUG-primary-color.svg` and updating the `SLUG/README.md` as appropriate.
+- `checkcommitteeurl`: Checks all open project GitHub issues and reports if the ``PCC TSC Committee URL`` field isn't set; creates optional GitHub Issue in TAC repo.
 
 You can run any of these commands with the `-h` flag to see the command line arguments required.
 
