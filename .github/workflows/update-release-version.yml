@@ -111,6 +111,7 @@ jobs:
             release
 
       - name: Enable Pull Request Automerge
+        shell: bash
         if: steps.cpr.outputs.pull-request-number != ''
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
