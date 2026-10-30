@@ -27,16 +27,17 @@ jobs:
         run: |
           RAW_TAG="${{ github.event.release.tag_name }}"
           VERSION="${RAW_TAG#v}"
-          
+
           # Dereference the tag to retrieve the underlying 40-character commit SHA
-          SHA=\((git rev-parse "\){RAW_TAG}^{commit}")
-          
-          echo "RAW_TAG=\({RAW_TAG}" >>\)GITHUB_OUTPUT
-          echo "VERSION=\({VERSION}" >>\)GITHUB_OUTPUT
-          echo "SHA=\({SHA}" >>\)GITHUB_OUTPUT
-          
-          # Debugging log output
-          echo "Processing Tag: \(RAW_TAG, Version:\)VERSION, SHA:$SHA"
+          SHA=$(git rev-parse "${RAW_TAG}^{commit}")
+
+          # Set step outputs
+          echo "RAW_TAG=${RAW_TAG}" >> "$GITHUB_OUTPUT"
+          echo "VERSION=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "SHA=${SHA}" >> "$GITHUB_OUTPUT"
+
+          # Debug logging
+          echo "Processing Tag: ${RAW_TAG}, Version: ${VERSION}, SHA: ${SHA}"
 
       - name: Update pyproject.toml
         run: |
@@ -45,7 +46,7 @@ jobs:
       - name: Update README.md (Self Action Version)
         run: |
           # Matches: uses: jmertic/lfx-tac-actions@ [optional # comment]
-          # Replaces with: uses: jmertic/lfx-tac-actions@ # 
+          # Replaces with: uses: jmertic/lfx-tac-actions@ #
           sed -i -E "s|uses: jmertic/lfx-tac-actions@[a-f0-9A-Za-z._-]+(\s*#[^\n]*)?|uses: jmertic/lfx-tac-actions@\({{ steps.meta.outputs.SHA }} #\){{ steps.meta.outputs.RAW_TAG }}|g" README.md
 
       - name: Update External Actions in README.md
@@ -64,7 +65,7 @@ jobs:
 
             for (const { owner, repo } of deps) {
               const fullRepo = `\({owner}/\){repo}`;
-              
+
               // 1. Get latest release tag
               const release = await github.rest.repos.getLatestRelease({ owner, repo });
               const tagName = release.data.tag_name;
@@ -82,7 +83,7 @@ jobs:
               // 3. Update matches in README.md
               const regex = new RegExp(`uses: ${fullRepo}@[a-zA-Z0-9_.-]+(\\s*#[^\\n]*)?`, 'g');
               const replacement = `uses: \({fullRepo}@\){sha} # ${tagName}`;
-              
+
               readme = readme.replace(regex, replacement);
               console.log(`Updated \({fullRepo} to\){sha} (# ${tagName})`);
             }
