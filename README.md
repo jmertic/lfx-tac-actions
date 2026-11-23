@@ -76,7 +76,7 @@ jobs:
         with:
           client-id: ${{ vars.APP_CLIENT_ID }}
           private-key: ${{ secrets.APP_PRIVATE_KEY }}
-      - uses: jmertic/lfx-tac-actions@({{ steps.meta.outputs.SHA }} #){{ steps.meta.outputs.RAW_TAG }}
+      - uses: jmertic/lfx-tac-actions@13097c41322c4d3b77ff202c67eb4de5e1a9439b # 20261123
         with:
           # refer to https://github.com/jmertic/lfx-tac-actions/blob/main/action.yml#L3 for the various inputs to set. 
         env:
@@ -103,7 +103,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: jmertic/lfx-tac-actions@({{ steps.meta.outputs.SHA }} #){{ steps.meta.outputs.RAW_TAG }}
+      - uses: jmertic/lfx-tac-actions@13097c41322c4d3b77ff202c67eb4de5e1a9439b # 20261123
         with:
           # refer to https://github.com/jmertic/lfx-tac-actions/blob/main/action.yml#L3 for the various inputs to set. 
         env:
